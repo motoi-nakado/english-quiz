@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ryue's English Quiz</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  background: #F5F0E8; color: #2C2416;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  cursor: pointer;
+}
+.header {
+  background: #E8633A; padding: 16px 20px 12px;
+  text-align: center; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 10px rgba(232,99,58,0.35);
+}
+.header h1 { font-size: 18px; font-weight: 800; color: #fff; }
+.header p  { font-size: 12px; color: rgba(255,255,255,0.88); margin-top: 3px; }
+.prog-wrap { background: rgba(255,255,255,0.3); height: 6px; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.prog-bar  { background: #fff; height: 100%; border-radius: 3px; transition: width 0.4s; width: 0%; }
+
+.tabs { display: flex; gap: 8px; padding: 14px 14px 0; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; background: #FFFDF8; border: 1.5px solid #E0D8CC;
+  border-radius: 20px; padding: 9px 16px; font-size: 13px; font-weight: 700;
+  color: #7A6E60; cursor: pointer; touch-action: manipulation;
+}
+.tab.active { background: #E8633A; border-color: #E8633A; color: #fff; }
+
+.section { display: none; padding: 14px; }
+.section.active { display: block; }
+
+.sec-title { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #E8633A; margin-bottom: 12px; }
+
+.q-card {
+  background: #FFFDF8; border: 1.5px solid #E0D8CC;
+  border-radius: 16px; padding: 14px 16px; margin-bottom: 11px;
+  box-shadow: 0 2px 8px rgba(44,36,22,0.08);
+}
+.q-card.ok { border-color: #4DA89E; background: #E8F7F5; }
+.q-card.ng { border-color: #E8633A; background: #FDF0EB; }
+.q-ja { font-size: 13px; color: #7A6E60; margin-bottom: 6px; }
+.q-en { font-size: 16px; font-weight: 600; line-height: 2.2; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+
+input.ans {
+  border: none; border-bottom: 2.5px solid #C8C0B4;
+  background: transparent; font-size: 16px; font-weight: 700;
+  color: #2C2416; padding: 4px 4px 2px; width: 110px;
+  outline: none; -webkit-appearance: none; border-radius: 0;
+}
+input.ans:focus { border-bottom-color: #4DA89E; }
+input.ans.ok { border-bottom-color: #4DA89E; color: #4DA89E; }
+input.ans.ng { border-bottom-color: #E8633A; color: #E8633A; }
+input.ans.wide   { width: min(150px, 42vw); }
+input.ans.short  { width: min(72px, 22vw); }
+input.ans.xshort { width: min(56px, 18vw); }
+
+.ans-reveal { font-size: 13px; color: #4DA89E; font-weight: 700; margin-top: 6px; display: none; }
+.q-card.ng .ans-reveal { display: block; }
+
+.btn-area { padding: 18px 14px 0; display: flex; flex-direction: column; gap: 10px; }
+.btn {
+  display: block; width: 100%; padding: 18px 15px;
+  border-radius: 14px; border: none; font-size: 17px; font-weight: 800;
+  cursor: pointer; touch-action: manipulation;
+  text-align: center; text-decoration: none;
+  -webkit-appearance: none;
+}
+.btn:active { opacity: 0.7; }
+.btn-check { background: #E8633A; color: #fff; }
+.btn-ans   { background: #4DA89E; color: #fff; }
+.btn-reset { background: #FFFDF8; color: #2C2416; border: 1.5px solid #E0D8CC; }
+
+.score-box {
+  margin: 16px 14px 0; background: #FFFDF8; border: 1.5px solid #E0D8CC;
+  border-radius: 16px; padding: 22px; text-align: center; display: none;
+}
+.score-box.show { display: block; }
+.score-emoji { font-size: 36px; display: block; margin-bottom: 8px; }
+.score-num  { font-size: 46px; font-weight: 800; color: #E8633A; }
+.score-of   { font-size: 18px; color: #7A6E60; }
+.score-pct  { font-size: 13px; color: #7A6E60; margin-top: 4px; }
+.score-msg  { font-size: 15px; font-weight: 700; color: #2C2416; margin-top: 6px; }
+
+.nav-row { display: flex; justify-content: space-between; padding: 12px 14px 0; }
+.nav-btn {
+  display: inline-block;
+  background: #FFFDF8; border: 1.5px solid #E0D8CC;
+  border-radius: 12px; padding: 14px 28px;
+  font-size: 15px; font-weight: 700; color: #2C2416;
+  cursor: pointer; touch-action: manipulation;
+  text-decoration: none;
+}
+.nav-btn:active { opacity: 0.6; }
+.nav-btn.disabled { opacity: 0.3; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🇬🇧 Ryue's English Quiz</h1>
+  <p>タップして答えを入力しよう！</p>
+  <div class="prog-wrap"><div class="prog-bar" id="progbar"></div></div>
+</div>
+
+<div class="tabs" id="tabRow">
+  <a class="tab active" href="javascript:void(0)" onclick="sw(0);return false;">① 曜日・月</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(1);return false;">② 単語</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(2);return false;">③ 文章</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(3);return false;">④ 質問応答</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(4);return false;">⑤ 自己紹介</a>
+</div>
+
+<!-- SECTION 1 -->
+<div class="section active" id="s0">
+  <div class="sec-title">曜日・月の名前</div>
+  <div class="q-card"><div class="q-ja">今日は何曜日？（5月31日）</div><div class="q-en">Today is <input class="ans" data-a="Sunday"> .</div><div class="ans-reveal">正解: Sunday</div></div>
+  <div class="q-card"><div class="q-ja">月曜日は英語で？</div><div class="q-en"><input class="ans" data-a="Monday"></div><div class="ans-reveal">正解: Monday</div></div>
+  <div class="q-card"><div class="q-ja">火曜日の略称は？</div><div class="q-en"><input class="ans short" data-a="Tue"></div><div class="ans-reveal">正解: Tue</div></div>
+  <div class="q-card"><div class="q-ja">水曜日は英語で？</div><div class="q-en"><input class="ans wide" data-a="Wednesday"></div><div class="ans-reveal">正解: Wednesday</div></div>
+  <div class="q-card"><div class="q-ja">木曜日の略称は？</div><div class="q-en"><input class="ans short" data-a="Thu"></div><div class="ans-reveal">正解: Thu</div></div>
+  <div class="q-card"><div class="q-ja">土曜日は英語で？</div><div class="q-en"><input class="ans" data-a="Saturday"></div><div class="ans-reveal">正解: Saturday</div></div>
+  <div class="q-card"><div class="q-ja">10月は英語で？</div><div class="q-en"><input class="ans" data-a="October"></div><div class="ans-reveal">正解: October</div></div>
+  <div class="q-card"><div class="q-ja">誕生日は10月1日。</div><div class="q-en">My birthday is <input class="ans" data-a="October"> <input class="ans short" data-a="1st"> .</div><div class="ans-reveal">正解: October 1st</div></div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section" id="s1">
+  <div class="sec-title">単語を英語で書こう</div>
+  <div class="q-card"><div class="q-ja">会社</div><div class="q-en"><input class="ans" data-a="company"></div><div class="ans-reveal">正解: company</div></div>
+  <div class="q-card"><div class="q-ja">オーストラリア</div><div class="q-en"><input class="ans wide" data-a="Australia"></div><div class="ans-reveal">正解: Australia</div></div>
+  <div class="q-card"><div class="q-ja">アメリカ</div><div class="q-en"><input class="ans" data-a="America"></div><div class="ans-reveal">正解: America</div></div>
+  <div class="q-card"><div class="q-ja">図書館</div><div class="q-en"><input class="ans" data-a="library"></div><div class="ans-reveal">正解: library</div></div>
+  <div class="q-card"><div class="q-ja">カレー</div><div class="q-en"><input class="ans short" data-a="curry"></div><div class="ans-reveal">正解: curry</div></div>
+  <div class="q-card"><div class="q-ja">英語</div><div class="q-en"><input class="ans" data-a="English"></div><div class="ans-reveal">正解: English</div></div>
+  <div class="q-card"><div class="q-ja">情報</div><div class="q-en"><input class="ans wide" data-a="information"></div><div class="ans-reveal">正解: information</div></div>
+  <div class="q-card"><div class="q-ja">バレーボール</div><div class="q-en"><input class="ans wide" data-a="volleyball"></div><div class="ans-reveal">正解: volleyball</div></div>
+  <div class="q-card"><div class="q-ja">戦争</div><div class="q-en"><input class="ans short" data-a="war"></div><div class="ans-reveal">正解: war</div></div>
+  <div class="q-card"><div class="q-ja">右</div><div class="q-en"><input class="ans short" data-a="right"></div><div class="ans-reveal">正解: right</div></div>
+  <div class="q-card"><div class="q-ja">左</div><div class="q-en"><input class="ans short" data-a="left"></div><div class="ans-reveal">正解: left</div></div>
+  <div class="q-card"><div class="q-ja">会員・所属者</div><div class="q-en"><input class="ans" data-a="member"></div><div class="ans-reveal">正解: member</div></div>
+  <div class="q-card"><div class="q-ja">水泳</div><div class="q-en"><input class="ans" data-a="swimming"></div><div class="ans-reveal">正解: swimming</div></div>
+  <div class="q-card"><div class="q-ja">芸術</div><div class="q-en"><input class="ans short" data-a="art"></div><div class="ans-reveal">正解: art</div></div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section" id="s2">
+  <div class="sec-title">文章を完成させよう</div>
+  <div class="q-card"><div class="q-ja">僕はカレーを食べる。</div><div class="q-en">I <input class="ans short" data-a="eat"> curry.</div><div class="ans-reveal">正解: eat</div></div>
+  <div class="q-card"><div class="q-ja">僕は英語を勉強する。</div><div class="q-en">I <input class="ans short" data-a="study"> English.</div><div class="ans-reveal">正解: study</div></div>
+  <div class="q-card"><div class="q-ja">僕はサッカーの本を読む。</div><div class="q-en">I <input class="ans short" data-a="read"> a soccer book.</div><div class="ans-reveal">正解: read</div></div>
+  <div class="q-card"><div class="q-ja">僕はギターを弾きます。</div><div class="q-en">I <input class="ans short" data-a="play"> the guitar.</div><div class="ans-reveal">正解: play</div></div>
+  <div class="q-card"><div class="q-ja">僕は働く。</div><div class="q-en">I <input class="ans short" data-a="work"> .</div><div class="ans-reveal">正解: work</div></div>
+  <div class="q-card"><div class="q-ja">僕は鳥の絵を書く。</div><div class="q-en">I <input class="ans short" data-a="draw"> birds.</div><div class="ans-reveal">正解: draw</div></div>
+  <div class="q-card"><div class="q-ja">僕は英語が好き。</div><div class="q-en">I <input class="ans short" data-a="like"> English.</div><div class="ans-reveal">正解: like</div></div>
+  <div class="q-card"><div class="q-ja">僕は12歳です。</div><div class="q-en">I am <input class="ans wide" data-a="12 years old"> .</div><div class="ans-reveal">正解: 12 years old</div></div>
+  <div class="q-card"><div class="q-ja">僕はサッカーをしたい。</div><div class="q-en">I <input class="ans wide" data-a="want to play"> soccer.</div><div class="ans-reveal">正解: want to play</div></div>
+  <div class="q-card"><div class="q-ja">僕はお菓子が好きではない。</div><div class="q-en">I <input class="ans wide" data-a="don't like"> sweets.</div><div class="ans-reveal">正解: don't like</div></div>
+  <div class="q-card"><div class="q-ja">僕は広島出身です。</div><div class="q-en">I am <input class="ans short" data-a="from"> Hiroshima.</div><div class="ans-reveal">正解: from</div></div>
+  <div class="q-card"><div class="q-ja">僕はピザが好き。</div><div class="q-en">I like <input class="ans short" data-a="pizza"> .</div><div class="ans-reveal">正解: pizza</div></div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section" id="s3">
+  <div class="sec-title">質問と答え方</div>
+  <div class="q-card"><div class="q-ja">「あなたはアニメファンですか？」</div><div class="q-en"><input class="ans short" data-a="Are"> you an anime fan?</div><div class="ans-reveal">正解: Are</div></div>
+  <div class="q-card"><div class="q-ja">「はい、そうです。」</div><div class="q-en"><input class="ans xshort" data-a="Yes"> , I <input class="ans xshort" data-a="am"> .</div><div class="ans-reveal">正解: Yes, I am.</div></div>
+  <div class="q-card"><div class="q-ja">「いいえ、ちがいます。」</div><div class="q-en"><input class="ans xshort" data-a="No"> , I'm <input class="ans xshort" data-a="not"> .</div><div class="ans-reveal">正解: No, I'm not.</div></div>
+  <div class="q-card"><div class="q-ja">「どこの出身ですか？」</div><div class="q-en"><input class="ans short" data-a="Where"> are you <input class="ans short" data-a="from"> ?</div><div class="ans-reveal">正解: Where / from</div></div>
+  <div class="q-card"><div class="q-ja">「広島出身です。」</div><div class="q-en">I am <input class="ans short" data-a="from"> Hiroshima.</div><div class="ans-reveal">正解: from</div></div>
+  <div class="q-card"><div class="q-ja">サッカーをする？→ はい</div><div class="q-en">Yes, I <input class="ans xshort" data-a="do"> .</div><div class="ans-reveal">正解: do</div></div>
+  <div class="q-card"><div class="q-ja">ピアノを弾く？→ いいえ</div><div class="q-en">No, I <input class="ans short" data-a="don't"> .</div><div class="ans-reveal">正解: don't</div></div>
+  <div class="q-card"><div class="q-ja">13歳ですか？→ はい</div><div class="q-en">Yes, I <input class="ans xshort" data-a="am"> .</div><div class="ans-reveal">正解: am</div></div>
+  <div class="q-card"><div class="q-ja">13歳ですか？→ いいえ</div><div class="q-en">No, I'm <input class="ans short" data-a="not"> .</div><div class="ans-reveal">正解: not</div></div>
+  <div class="q-card"><div class="q-ja">ペットはいますか？（質問）</div><div class="q-en">Do you have any <input class="ans short" data-a="pets"> ?</div><div class="ans-reveal">正解: pets</div></div>
+  <div class="q-card"><div class="q-ja">猫はいません。</div><div class="q-en">I <input class="ans short" data-a="don't"> have a cat.</div><div class="ans-reveal">正解: don't</div></div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section" id="s4">
+  <div class="sec-title">Ryueの自己紹介</div>
+  <div class="q-card"><div class="q-ja">名前はリューです。</div><div class="q-en">My name is <input class="ans short" data-a="Ryue"> .</div><div class="ans-reveal">正解: Ryue</div></div>
+  <div class="q-card"><div class="q-ja">「こんにちは、リューです。」</div><div class="q-en">Hi, I'm <input class="ans short" data-a="Ryue"> .</div><div class="ans-reveal">正解: Ryue</div></div>
+  <div class="q-card"><div class="q-ja">お肉が好きです。</div><div class="q-en">I <input class="ans short" data-a="like"> meat.</div><div class="ans-reveal">正解: like</div></div>
+  <div class="q-card"><div class="q-ja">リューと呼んでください。</div><div class="q-en">Please <input class="ans wide" data-a="call me Ryu"> .</div><div class="ans-reveal">正解: call me Ryu</div></div>
+  <div class="q-card"><div class="q-ja">廿日市市のテニスクラブの会員です。</div><div class="q-en">I'm a <input class="ans short" data-a="member"> of a tennis club in Hatsukaichi City.</div><div class="ans-reveal">正解: member</div></div>
+  <div class="q-card"><div class="q-ja">自分のウサギが好きです。</div><div class="q-en">I like my <input class="ans short" data-a="rabbit"> .</div><div class="ans-reveal">正解: rabbit</div></div>
+  <div class="q-card"><div class="q-ja">青色が好き。</div><div class="q-en">I like <input class="ans short" data-a="blue"> .</div><div class="ans-reveal">正解: blue</div></div>
+  <div class="q-card"><div class="q-ja">R-1が好きです。</div><div class="q-en">I like <input class="ans short" data-a="R-1"> .</div><div class="ans-reveal">正解: R-1</div></div>
+</div>
+
+<!-- ボタン -->
+<div class="btn-area">
+  <a class="btn btn-check" href="javascript:void(0)" onclick="check();return false;">✓ 採点する</a>
+  <a class="btn btn-ans"   href="javascript:void(0)" onclick="showAns();return false;">💡 答えを見る</a>
+  <a class="btn btn-reset" href="javascript:void(0)" onclick="doReset();return false;">↺ リセット</a>
+</div>
+
+<div class="score-box" id="scorebox">
+  <span class="score-emoji" id="semoji">🎉</span>
+  <div><span class="score-num" id="snum">0</span><span class="score-of" id="sof"> / 0</span></div>
+  <div class="score-pct" id="spct"></div>
+  <div class="score-msg" id="smsg"></div>
+</div>
+
+<div class="nav-row">
+  <a class="nav-btn" id="btnPrev" href="javascript:void(0)" onclick="sw(cur-1);return false;">◀ 前へ</a>
+  <a class="nav-btn" id="btnNext" href="javascript:void(0)" onclick="sw(cur+1);return false;">次へ ▶</a>
+</div>
+
+<script>
+var cur = 0;
+var total = 5;
+
+function sw(n) {
+  if (n < 0 || n >= total) return;
+  var sections = document.querySelectorAll('.section');
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < sections.length; i++) {
+    sections[i].style.display = (i === n) ? 'block' : 'none';
+  }
+  for (var j = 0; j < tabs.length; j++) {
+    if (j === n) { tabs[j].className = 'tab active'; }
+    else         { tabs[j].className = 'tab'; }
+  }
+  cur = n;
+  document.getElementById('scorebox').style.display = 'none';
+  var prev = document.getElementById('btnPrev');
+  var next = document.getElementById('btnNext');
+  if (cur === 0)         { prev.className = 'nav-btn disabled'; }
+  else                   { prev.className = 'nav-btn'; }
+  if (cur === total - 1) { next.className = 'nav-btn disabled'; }
+  else                   { next.className = 'nav-btn'; }
+  window.scrollTo(0, 0);
+}
+
+function norm(s) {
+  return s.trim().toLowerCase().replace(/\s+/g, ' ').replace(/['\u2019]/g, "'");
+}
+
+function check() {
+  var sec = document.getElementById('s' + cur);
+  var cards = sec.querySelectorAll('.q-card');
+  var correct = 0, tot = 0;
+  for (var i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    var ins = card.querySelectorAll('input.ans');
+    var cardOk = true;
+    for (var j = 0; j < ins.length; j++) {
+      var inp = ins[j];
+      tot++;
+      inp.className = inp.className.replace(/\b(ok|ng)\b/g, '').trim();
+      var expected = (inp.getAttribute('data-a') || '').split('|').map(norm);
+      if (expected.indexOf(norm(inp.value)) >= 0) {
+        inp.className += ' ok'; correct++;
+      } else {
+        inp.className += ' ng'; cardOk = false;
+      }
+    }
+    card.className = card.className.replace(/\b(ok|ng)\b/g, '').trim();
+    if (ins.length > 0) card.className += ' ' + (cardOk ? 'ok' : 'ng');
+  }
+  var box = document.getElementById('scorebox');
+  box.style.display = 'block';
+  document.getElementById('snum').textContent = correct;
+  document.getElementById('sof').textContent = ' / ' + tot;
+  var pct = tot ? Math.round(correct / tot * 100) : 0;
+  document.getElementById('spct').textContent = pct + '%';
+  var emoji = '💪', msg = 'もう一度チャレンジしよう！';
+  if (pct === 100) { emoji = '🎉'; msg = '全問正解！パーフェクト！'; }
+  else if (pct >= 80) { emoji = '😄'; msg = 'とても良くできました！'; }
+  else if (pct >= 60) { emoji = '👍'; msg = 'よくできました！'; }
+  document.getElementById('semoji').textContent = emoji;
+  document.getElementById('smsg').textContent = msg;
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  updateProg();
+}
+
+function showAns() {
+  var sec = document.getElementById('s' + cur);
+  var cards = sec.querySelectorAll('.q-card');
+  for (var i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    card.className = card.className.replace(/\b(ok|ng)\b/g, '').trim() + ' ok';
+    var ins = card.querySelectorAll('input.ans');
+    for (var j = 0; j < ins.length; j++) {
+      var inp = ins[j];
+      inp.value = (inp.getAttribute('data-a') || '').split('|')[0];
+      inp.className = inp.className.replace(/\b(ok|ng)\b/g, '').trim() + ' ok';
+    }
+  }
+  document.getElementById('scorebox').style.display = 'none';
+  updateProg();
+}
+
+function doReset() {
+  var sec = document.getElementById('s' + cur);
+  var cards = sec.querySelectorAll('.q-card');
+  for (var i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    card.className = card.className.replace(/\b(ok|ng)\b/g, '').trim();
+    var ins = card.querySelectorAll('input.ans');
+    for (var j = 0; j < ins.length; j++) {
+      var inp = ins[j];
+      inp.value = '';
+      inp.className = inp.className.replace(/\b(ok|ng)\b/g, '').trim();
+    }
+  }
+  document.getElementById('scorebox').style.display = 'none';
+  updateProg();
+}
+
+function updateProg() {
+  var all = document.querySelectorAll('input.ans');
+  var filled = 0;
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].value.trim() !== '') filled++;
+  }
+  var pct = all.length ? Math.round(filled / all.length * 100) : 0;
+  document.getElementById('progbar').style.width = pct + '%';
+}
+
+// 入力イベント
+var allInputs = document.querySelectorAll('input.ans');
+for (var i = 0; i < allInputs.length; i++) {
+  allInputs[i].addEventListener('input', updateProg);
+}
+
+// 初期化
+sw(0);
+</script>
+</body>
+</html>

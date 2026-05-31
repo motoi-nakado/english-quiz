@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>英語クイズ — Ryue's English Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F0E8;
+    --card: #FFFDF8;
+    --accent: #E8633A;
+    --accent2: #4DA89E;
+    --accent3: #F2A93B;
+    --text: #2C2416;
+    --muted: #7A6E60;
+    --border: #E0D8CC;
+    --correct: #4DA89E;
+    --wrong: #E8633A;
+    --correct-bg: #E8F7F5;
+    --wrong-bg: #FDF0EB;
+    --shadow: 0 2px 12px rgba(44,36,22,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* Header */
+  .header {
+    background: var(--accent);
+    padding: 20px 20px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(232,99,58,0.3);
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .header p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 3px;
+  }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.3);
+    height: 6px;
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    background: #fff;
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* Section tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    padding: 16px 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Quiz container */
+  .quiz-section {
+    display: none;
+    padding: 16px;
+  }
+  .quiz-section.active { display: block; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.3s;
+  }
+  .q-card.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .q-card.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+
+  .q-ja {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .q-en {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.8;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+
+  input.ans {
+    border: none;
+    border-bottom: 2.5px solid var(--border);
+    background: transparent;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 2px 4px;
+    min-width: 80px;
+    max-width: 160px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input.ans:focus { border-bottom-color: var(--accent2); }
+  input.ans.correct { border-bottom-color: var(--correct); color: var(--correct); }
+  input.ans.wrong { border-bottom-color: var(--wrong); color: var(--wrong); }
+
+  .q-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    padding-left: 2px;
+  }
+  .q-correct-ans {
+    font-size: 12px;
+    color: var(--correct);
+    font-weight: 700;
+    margin-top: 4px;
+    display: none;
+  }
+  .q-card.wrong .q-correct-ans { display: block; }
+
+  /* Buttons */
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 16px 0;
+  }
+  .btn {
+    padding: 14px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .btn:active { transform: scale(0.96); opacity: 0.9; }
+  .btn-check {
+    background: var(--accent);
+    color: #fff;
+    grid-column: 1 / -1;
+    font-size: 17px;
+    padding: 16px;
+  }
+  .btn-show { background: var(--accent2); color: #fff; }
+  .btn-reset { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+
+  /* Score */
+  .score-box {
+    margin: 16px 16px 0;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    display: none;
+    box-shadow: var(--shadow);
+  }
+  .score-box.show { display: block; }
+  .score-num {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-denom { font-size: 20px; color: var(--muted); }
+  .score-msg { font-size: 15px; margin-top: 8px; color: var(--text); font-weight: 600; }
+  .score-pct {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Nav bottom */
+  .nav-bottom {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px 0;
+  }
+  .nav-btn {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .nav-btn:active { transform: scale(0.96); }
+  .nav-btn:disabled { opacity: 0.35; pointer-events: none; }
+
+  .emoji-big { font-size: 32px; display: block; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🇬🇧 Ryue's English Quiz</h1>
+  <p>タップして答えを入力しよう！</p>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="prog-bar"></div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs" id="tabs"></div>
+
+<!-- Sections will be injected here -->
+<div id="sections-container"></div>
+
+<!-- Buttons -->
+<div class="btn-row">
+  <button class="btn btn-check" onclick="checkAll()">✓ 採点する</button>
+  <button class="btn btn-show" onclick="showAnswers()">💡 答えを見る</button>
+  <button class="btn btn-reset" onclick="resetAll()">↺ リセット</button>
+</div>
+
+<div class="score-box" id="score-box">
+  <span class="emoji-big" id="score-emoji">🎉</span>
+  <div><span class="score-num" id="snum">0</span><span class="score-denom" id="sdenom"> / 0</span></div>
+  <div class="score-pct" id="spct"></div>
+  <div class="score-msg" id="smsg"></div>
+</div>
+
+<div class="nav-bottom">
+  <button class="nav-btn" id="btn-prev" onclick="changeSection(-1)">◀ 前へ</button>
+  <button class="nav-btn" id="btn-next" onclick="changeSection(1)">次へ ▶</button>
+</div>
+
+<script>
+const SECTIONS = [
+  {
+    id: 's1',
+    label: '① 曜日・月',
+    title: '曜日・月の名前',
+    qs: [
+      { ja: '今日は何曜日？（5月31日）', en: ['Today is ', {a:'Sunday'}, '.'] },
+      { ja: '月曜日は英語で？', en: [{a:'Monday'}] },
+      { ja: '火曜日の略称は？', en: [{a:'Tue'}] },
+      { ja: '水曜日は英語で？', en: [{a:'Wednesday'}] },
+      { ja: '木曜日の略称は？', en: [{a:'Thu'}] },
+      { ja: '土曜日は英語で？', en: [{a:'Saturday'}] },
+      { ja: '10月は英語で？', en: [{a:'October'}] },
+      { ja: '誕生日は10月1日。', en: ['My birthday is ', {a:'October'}, ' ', {a:'1st', w:70}, '.'] },
+    ]
+  },
+  {
+    id: 's2',
+    label: '② 単語',
+    title: '単語を英語で書こう',
+    qs: [
+      { ja: '会社', en: [{a:'company'}] },
+      { ja: 'オーストラリア', en: [{a:'Australia'}] },
+      { ja: 'アメリカ', en: [{a:'America'}] },
+      { ja: '図書館', en: [{a:'library'}] },
+      { ja: 'カレー', en: [{a:'curry'}] },
+      { ja: '英語', en: [{a:'English'}] },
+      { ja: '情報', en: [{a:'information'}] },
+      { ja: 'バレーボール', en: [{a:'volleyball'}] },
+      { ja: '戦争', en: [{a:'war'}] },
+      { ja: '右', en: [{a:'right'}] },
+      { ja: '左', en: [{a:'left'}] },
+      { ja: '会員・所属者', en: [{a:'member'}] },
+      { ja: '水泳', en: [{a:'swimming'}] },
+      { ja: '芸術', en: [{a:'art'}] },
+    ]
+  },
+  {
+    id: 's3',
+    label: '③ 文章',
+    title: '文章を完成させよう',
+    qs: [
+      { ja: '僕はカレーを食べる。', en: ['I ', {a:'eat'}, ' curry.'] },
+      { ja: '僕は英語を勉強する。', en: ['I ', {a:'study'}, ' English.'] },
+      { ja: '僕はサッカーの本を読む。', en: ['I ', {a:'read'}, ' a soccer book.'] },
+      { ja: '僕はギターを弾きます。', en: ['I ', {a:'play'}, ' the guitar.'] },
+      { ja: '僕は働く。', en: ['I ', {a:'work'}, '.'] },
+      { ja: '僕は鳥の絵を書く。', en: ['I ', {a:'draw'}, ' birds.'] },
+      { ja: '僕は英語が好き。', en: ['I ', {a:'like'}, ' English.'] },
+      { ja: '僕は12歳です。', en: ['I am ', {a:'12 years old', w:130}, '.'] },
+      { ja: '僕はサッカーをしたい。', en: ['I ', {a:'want to play', w:130}, ' soccer.'] },
+      { ja: '僕はお菓子が好きではない。', en: ["I ", {a:"don't like", w:110}, " sweets."] },
+      { ja: '僕は広島出身です。', en: ['I am ', {a:'from'}, ' Hiroshima.'] },
+      { ja: '僕はピザが好き。', en: ['I like ', {a:'pizza'}, '.'] },
+    ]
+  },
+  {
+    id: 's4',
+    label: '④ 質問応答',
+    title: '質問と答え方',
+    qs: [
+      { ja: '「あなたはアニメファンですか？」', en: [{a:'Are'}, ' you an anime fan?'] },
+      { ja: '「はい、そうです。」', en: [{a:'Yes', w:60}, ', I ', {a:'am', w:55}, '.'] },
+      { ja: '「いいえ、ちがいます。」', en: [{a:"No", w:55}, ", I'm ", {a:"not", w:60}, '.'] },
+      { ja: '「どこの出身ですか？」', en: [{a:'Where'}, ' are you ', {a:'from'}, '?'] },
+      { ja: '「広島出身です。」', en: ['I am ', {a:'from'}, ' Hiroshima.'] },
+      { ja: 'サッカーする？→ はい', en: ['Yes, I ', {a:'do', w:55}, '.'] },
+      { ja: 'ピアノを弾く？→ いいえ', en: ["No, I ", {a:"don't", w:75}, '.'] },
+      { ja: '13歳ですか？→ はい', en: ['Yes, I ', {a:'am', w:55}, '.'] },
+      { ja: '13歳ですか？→ いいえ', en: ["No, I'm ", {a:"not", w:60}, '.'] },
+      { ja: 'ペットはいますか？（質問）', en: ['Do you have any ', {a:'pets'}, '?'] },
+      { ja: '猫はいません。', en: ["I ", {a:"don't", w:75}, " have a cat."] },
+    ]
+  },
+  {
+    id: 's5',
+    label: '⑤ 自己紹介',
+    title: 'Ryueの自己紹介',
+    qs: [
+      { ja: '名前はリューです。', en: ['My name is ', {a:'Ryue'}, '.'] },
+      { ja: '「こんにちは、リューです。」', en: ['Hi, I\'m ', {a:'Ryue'}, '.'] },
+      { ja: 'お肉が好きです。', en: ['I ', {a:'like'}, ' meat.'] },
+      { ja: 'リューと呼んでください。', en: ['Please ', {a:'call me Ryu', w:130}, '.'] },
+      { ja: '廿日市市のテニスクラブの会員です。', en: ["I'm a ", {a:'member'}, " of a tennis club in Hatsukaichi City."] },
+      { ja: '自分のウサギが好きです。', en: ['I like my ', {a:'rabbit'}, '.'] },
+      { ja: '青色が好き。', en: ['I like ', {a:'blue'}, '.'] },
+      { ja: 'R-1が好きです。', en: ['I like ', {a:'R-1'}, '.'] },
+    ]
+  },
+];
+
+let currentSection = 0;
+
+function norm(s) {
+  return s.trim().toLowerCase().replace(/\s+/g,' ').replace(/['']/g,"'");
+}
+
+function buildSections() {
+  const tabs = document.getElementById('tabs');
+  const cont = document.getElementById('sections-container');
+  SECTIONS.forEach((sec, si) => {
+    // Tab
+    const t = document.createElement('button');
+    t.className = 'tab' + (si === 0 ? ' active' : '');
+    t.textContent = sec.label;
+    t.onclick = () => switchSection(si);
+    tabs.appendChild(t);
+
+    // Section div
+    const div = document.createElement('div');
+    div.className = 'quiz-section' + (si === 0 ? ' active' : '');
+    div.id = sec.id;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.textContent = sec.title;
+    div.appendChild(lbl);
+
+    sec.qs.forEach((q, qi) => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      card.id = `card-${si}-${qi}`;
+
+      if (q.ja) {
+        const ja = document.createElement('div');
+        ja.className = 'q-ja';
+        ja.textContent = q.ja;
+        card.appendChild(ja);
+      }
+
+      const en = document.createElement('div');
+      en.className = 'q-en';
+
+      q.en.forEach((part, pi) => {
+        if (typeof part === 'string') {
+          const sp = document.createElement('span');
+          sp.textContent = part;
+          en.appendChild(sp);
+        } else {
+          const inp = document.createElement('input');
+          inp.type = 'text';
+          inp.className = 'ans';
+          inp.dataset.answer = part.a;
+          inp.id = `inp-${si}-${qi}-${pi}`;
+          inp.autocomplete = 'off';
+          inp.autocorrect = 'off';
+          inp.autocapitalize = 'off';
+          inp.spellcheck = false;
+          if (part.w) inp.style.width = part.w + 'px';
+          inp.addEventListener('input', () => { updateProgress(); });
+          en.appendChild(inp);
+        }
+      });
+      card.appendChild(en);
+
+      const correctAns = document.createElement('div');
+      correctAns.className = 'q-correct-ans';
+      const answers = q.en.filter(p => typeof p === 'object').map(p => p.a);
+      correctAns.textContent = '✓ 正解: ' + answers.join(' / ');
+      card.appendChild(correctAns);
+
+      div.appendChild(card);
+    });
+
+    cont.appendChild(div);
+  });
+  updateNavBtns();
+  updateProgress();
+}
+
+function switchSection(idx) {
+  currentSection = idx;
+  document.querySelectorAll('.quiz-section').forEach((s, i) => {
+    s.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  document.getElementById('score-box').classList.remove('show');
+  updateNavBtns();
+  window.scrollTo(0, 0);
+}
+
+function changeSection(dir) {
+  const next = currentSection + dir;
+  if (next >= 0 && next < SECTIONS.length) switchSection(next);
+}
+
+function updateNavBtns() {
+  document.getElementById('btn-prev').disabled = currentSection === 0;
+  document.getElementById('btn-next').disabled = currentSection === SECTIONS.length - 1;
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('input.ans');
+  const filled = Array.from(all).filter(i => i.value.trim() !== '').length;
+  const pct = all.length ? Math.round(filled / all.length * 100) : 0;
+  document.getElementById('prog-bar').style.width = pct + '%';
+}
+
+function checkAll() {
+  const sec = SECTIONS[currentSection];
+  let correct = 0, total = 0;
+  sec.qs.forEach((q, qi) => {
+    const card = document.getElementById(`card-${currentSection}-${qi}`);
+    let cardCorrect = true, cardHasInput = false;
+    q.en.forEach((part, pi) => {
+      if (typeof part === 'object') {
+        cardHasInput = true;
+        const inp = document.getElementById(`inp-${currentSection}-${qi}-${pi}`);
+        if (!inp) return;
+        total++;
+        inp.classList.remove('correct', 'wrong');
+        const expected = part.a.split('|').map(norm);
+        if (expected.includes(norm(inp.value))) {
+          inp.classList.add('correct');
+          correct++;
+        } else {
+          inp.classList.add('wrong');
+          cardCorrect = false;
+        }
+      }
+    });
+    if (cardHasInput) {
+      card.classList.remove('correct', 'wrong');
+      card.classList.add(cardCorrect ? 'correct' : 'wrong');
+    }
+  });
+
+  const box = document.getElementById('score-box');
+  box.classList.add('show');
+  document.getElementById('snum').textContent = correct;
+  document.getElementById('sdenom').textContent = ' / ' + total;
+  const pct = total ? Math.round(correct / total * 100) : 0;
+  document.getElementById('spct').textContent = pct + '%';
+  let emoji = '💪', msg = 'もう一度チャレンジしよう！';
+  if (pct === 100) { emoji = '🎉'; msg = '全問正解！パーフェクト！'; }
+  else if (pct >= 80) { emoji = '😄'; msg = 'とても良くできました！'; }
+  else if (pct >= 60) { emoji = '👍'; msg = 'よくできました！'; }
+  document.getElementById('score-emoji').textContent = emoji;
+  document.getElementById('smsg').textContent = msg;
+  box.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function showAnswers() {
+  const sec = SECTIONS[currentSection];
+  sec.qs.forEach((q, qi) => {
+    const card = document.getElementById(`card-${currentSection}-${qi}`);
+    card.classList.remove('correct','wrong');
+    q.en.forEach((part, pi) => {
+      if (typeof part === 'object') {
+        const inp = document.getElementById(`inp-${currentSection}-${qi}-${pi}`);
+        if (!inp) return;
+        inp.value = part.a.split('|')[0];
+        inp.classList.remove('wrong');
+        inp.classList.add('correct');
+      }
+    });
+    card.classList.add('correct');
+  });
+  document.getElementById('score-box').classList.remove('show');
+  updateProgress();
+}
+
+function resetAll() {
+  const sec = SECTIONS[currentSection];
+  sec.qs.forEach((q, qi) => {
+    const card = document.getElementById(`card-${currentSection}-${qi}`);
+    card.classList.remove('correct','wrong');
+    q.en.forEach((part, pi) => {
+      if (typeof part === 'object') {
+        const inp = document.getElementById(`inp-${currentSection}-${qi}-${pi}`);
+        if (!inp) return;
+        inp.value = '';
+        inp.classList.remove('correct','wrong');
+      }
+    });
+  });
+  document.getElementById('score-box').classList.remove('show');
+  updateProgress();
+}
+
+buildSections();
+</script>
+</body>
+</html>
