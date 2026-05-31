@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>疑問文の作り方 練習問題</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Noto Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
+  background:#f0f4f8;
+  color:#1a1a2e;
+  min-height:100vh;
+  padding:0;
+}
+.header{
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+  padding:16px 20px 12px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.header h1{font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:2px}
+.subtitle{font-size:12px;color:#888;margin-bottom:10px}
+.prog-row{display:flex;align-items:center;gap:10px}
+.prog-track{flex:1;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:#2563eb;transition:width .35s}
+.prog-lbl{font-size:12px;color:#666;min-width:40px;text-align:right}
+.score-pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;background:#dbeafe;color:#1d4ed8}
+
+.main{padding:16px}
+
+.qcard{
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:12px;letter-spacing:.5px}
+.be-b{background:#dbeafe;color:#1e40af}
+.gen-b{background:#dcfce7;color:#166534}
+.qdir{font-size:13px;color:#888;margin-bottom:5px}
+.qsent{font-size:19px;font-weight:700;margin-bottom:3px;line-height:1.5;color:#1a1a2e}
+.qja{font-size:13px;color:#aaa;margin-bottom:18px}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.opt-btn{
+  padding:12px 8px;
+  border-radius:12px;
+  border:1.5px solid #e5e7eb;
+  background:#fff;
+  cursor:pointer;
+  font-size:15px;
+  font-family:inherit;
+  color:#1a1a2e;
+  font-weight:700;
+  transition:all .15s;
+  text-align:center;
+  -webkit-appearance:none;
+}
+.opt-btn:active{transform:scale(.97)}
+.opt-btn.correct{background:#dcfce7;color:#166534;border-color:#86efac}
+.opt-btn.wrong{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+
+.bank-lbl{font-size:12px;color:#aaa;margin-bottom:7px}
+.bank{display:flex;flex-wrap:wrap;gap:7px;min-height:36px;margin-bottom:12px}
+.wchip{
+  padding:9px 16px;
+  border-radius:22px;
+  border:1.5px solid #e5e7eb;
+  background:#fff;
+  cursor:pointer;
+  font-size:14px;
+  font-family:inherit;
+  color:#1a1a2e;
+  font-weight:500;
+  -webkit-appearance:none;
+}
+.wchip.used{opacity:0;pointer-events:none;width:0;padding:0;border:none;overflow:hidden;margin:0}
+.slots-wrap{
+  display:flex;flex-wrap:wrap;gap:7px;
+  min-height:52px;padding:10px 12px;
+  border-radius:12px;border:2px dashed #cbd5e1;
+  background:#f8fafc;align-items:center;margin-bottom:12px;
+}
+.schip{
+  padding:9px 16px;border-radius:22px;
+  font-size:14px;font-family:inherit;font-weight:500;
+  cursor:pointer;background:#dbeafe;color:#1e40af;border:none;
+  -webkit-appearance:none;
+}
+.sph{font-size:13px;color:#ccc}
+
+.fill-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.fill-st{font-size:16px;color:#1a1a2e;font-weight:500}
+.fill-in{
+  border:none;border-bottom:2.5px solid #94a3b8;
+  background:transparent;font-size:16px;font-family:inherit;
+  color:#2563eb;font-weight:700;padding:2px 8px;
+  width:90px;outline:none;text-align:center;
+  border-radius:0;-webkit-appearance:none;
+}
+.fill-in:focus{border-bottom-color:#2563eb}
+
+.chk-btn{
+  padding:11px 22px;border-radius:12px;
+  border:1.5px solid #e5e7eb;background:#f1f5f9;
+  cursor:pointer;font-size:14px;font-family:inherit;
+  color:#1a1a2e;font-weight:700;margin-bottom:8px;
+  -webkit-appearance:none;
+}
+.chk-btn:disabled{opacity:.4;cursor:default}
+
+.fb{display:none;margin-top:12px;padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.7}
+.fb.ok{display:block;background:#dcfce7;color:#166534}
+.fb.ng{display:block;background:#fee2e2;color:#991b1b}
+
+.nav-row{margin-top:14px}
+.next-btn{
+  display:block;width:100%;padding:14px;border-radius:12px;
+  border:none;background:#2563eb;color:#fff;
+  cursor:pointer;font-size:16px;font-family:inherit;font-weight:700;
+  -webkit-appearance:none;
+}
+.next-btn:active{background:#1d4ed8}
+
+.fin-card{
+  background:#fff;border-radius:16px;
+  padding:40px 24px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.fin-score{font-size:52px;font-weight:700;color:#1a1a2e;margin-bottom:6px}
+.fin-lbl{font-size:14px;color:#888;margin-bottom:8px}
+.fin-msg{font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:28px;line-height:1.6}
+.retry-btn{
+  padding:14px 36px;border-radius:12px;border:none;
+  background:#2563eb;color:#fff;cursor:pointer;
+  font-size:16px;font-family:inherit;font-weight:700;
+  -webkit-appearance:none;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>疑問文の作り方 練習問題</h1>
+  <p class="subtitle">中学1年生 英語 — be動詞 / 一般動詞</p>
+  <div class="prog-row">
+    <div class="prog-track"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+    <span class="prog-lbl" id="pl">0 / 10</span>
+    <span class="score-pill" id="sp">0点</span>
+  </div>
+</div>
+<div class="main" id="qa"></div>
+
+<script>
+var qs=[
+  {type:'be',kind:'choice',dir:'次の文を疑問文にするとき、最初に来る語はどれ？',sent:'She is a teacher.',ja:'彼女は先生です。',opts:['Is','Does','Do','Has'],ans:'Is',fb:'be動詞 is を文の先頭に出すだけ！ → Is she a teacher?'},
+  {type:'gen',kind:'choice',dir:'次の文を疑問文にするとき、最初に来る語はどれ？',sent:'You like soccer.',ja:'あなたはサッカーが好きです。',opts:['Are','Do','Is','Does'],ans:'Do',fb:'一般動詞の疑問文は Do を先頭に！ → Do you like soccer?'},
+  {type:'be',kind:'rearrange',dir:'語句を並べかえて疑問文を作ろう。',sent:'They are students.',ja:'彼らは生徒です。',words:['they','Are','?','students'],ans:['Are','they','students','?'],fb:'be動詞 are を先頭に → Are they students?'},
+  {type:'gen',kind:'rearrange',dir:'語句を並べかえて疑問文を作ろう。',sent:'He plays the guitar.',ja:'彼はギターを弾きます。',words:['he','Does','?','play','the guitar'],ans:['Does','he','play','the guitar','?'],fb:'三人称単数なので Does を先頭に。動詞は原形 play に！ → Does he play the guitar?'},
+  {type:'be',kind:'fill',dir:'空欄に適切な語を入れて疑問文を完成させよう。',parts:['___','you','a','junior','high','school','student','?'],blank:0,ja:'あなたは中学生ですか？',ans:'Are',fb:'主語が you なので be動詞は Are → Are you a junior high school student?'},
+  {type:'gen',kind:'fill',dir:'空欄に適切な語を入れて疑問文を完成させよう。',parts:['Do','you','___','English','every','day','?'],blank:2,ja:'あなたは毎日英語を勉強しますか？',ans:'study',fb:'Do のあとの動詞は必ず原形！ → Do you study English every day?'},
+  {type:'gen',kind:'choice',dir:'次の文を疑問文にするとき、最初に来る語はどれ？',sent:'Saki has a cat.',ja:'サキは猫を飼っています。',opts:['Do','Is','Does','Has'],ans:'Does',fb:'三人称単数（Saki）は Does を先頭に。has → have に戻す → Does Saki have a cat?'},
+  {type:'be',kind:'rearrange',dir:'語句を並べかえて疑問文を作ろう。',sent:'Ken is in the library.',ja:'ケンは図書館にいます。',words:['Is','Ken','?','in the library'],ans:['Is','Ken','in the library','?'],fb:'be動詞 is を先頭に → Is Ken in the library?'},
+  {type:'gen',kind:'fill',dir:'空欄に適切な語を入れて疑問文を完成させよう。',parts:['Does','she','___','to','school','by','bus','?'],blank:2,ja:'彼女はバスで学校に行きますか？',ans:'go',fb:'Does のあとの動詞は原形！goes → go → Does she go to school by bus?'},
+  {type:'be',kind:'choice',dir:'次の文を疑問文にするとき、最初に来る語はどれ？',sent:'I am late.',ja:'私は遅刻しています。',opts:['Am','Do','Is','Are'],ans:'Am',fb:'主語が I のとき am を先頭に → Am I late?'},
+];
+var cur=0,score=0,sw=[];
+
+function mk(tag,cls){var e=document.createElement(tag);if(cls)e.className=cls;return e;}
+
+function upd(){
+  document.getElementById('pf').style.width=Math.round(cur/qs.length*100)+'%';
+  document.getElementById('pl').textContent=cur+' / '+qs.length;
+  document.getElementById('sp').textContent=score+'点';
+}
+
+function render(){
+  if(cur>=qs.length){fin();return;}
+  upd();
+  var q=qs[cur],a=document.getElementById('qa');
+  a.innerHTML='';
+  var card=mk('div','qcard');
+  var bdg=mk('div','badge '+(q.type==='be'?'be-b':'gen-b'));
+  bdg.textContent=q.type==='be'?'be動詞':'一般動詞';card.appendChild(bdg);
+  var dir=mk('div','qdir');dir.textContent=q.dir;card.appendChild(dir);
+  var sent=mk('div','qsent');sent.textContent=q.sent;card.appendChild(sent);
+  var ja=mk('div','qja');ja.textContent=q.ja;card.appendChild(ja);
+  if(q.kind==='choice')bChoice(card,q);
+  else if(q.kind==='rearrange')bRearrange(card,q);
+  else bFill(card,q);
+  var fb=mk('div','fb');fb.id='fb';card.appendChild(fb);
+  var nav=mk('div','nav-row');
+  var nb=mk('button','next-btn');nb.id='nb';nb.style.display='none';
+  nb.textContent=cur<qs.length-1?'次の問題へ →':'結果を見る ✓';
+  nb.onclick=function(){cur++;render();window.scrollTo(0,0);};
+  nav.appendChild(nb);card.appendChild(nav);
+  a.appendChild(card);
+}
+
+function bChoice(card,q){
+  var w=mk('div','opts');
+  q.opts.forEach(function(o){
+    var b=mk('button','opt-btn');b.textContent=o;
+    b.onclick=function(){
+      if(this.disabled)return;
+      w.querySelectorAll('.opt-btn').forEach(function(x){
+        x.disabled=true;
+        if(x.textContent===q.ans)x.className='opt-btn correct';
+        else if(x.textContent===o&&o!==q.ans)x.className='opt-btn wrong';
+      });
+      if(o===q.ans)score++;
+      showFb(o===q.ans,q.fb);
+    };
+    w.appendChild(b);
+  });
+  card.appendChild(w);
+}
+
+function bRearrange(card,q){
+  sw=[];
+  var ra=mk('div','');
+  var bl=mk('div','bank-lbl');bl.textContent='単語バンク（タップして並べよう）';ra.appendChild(bl);
+  var bank=mk('div','bank');bank.id='bk';
+  var sh=q.words.slice().sort(function(){return Math.random()-.5;});
+  sh.forEach(function(w,i){
+    var c=mk('button','wchip');c.textContent=w;c.dataset.i=i;
+    c.onclick=function(){
+      if(this.classList.contains('used'))return;
+      this.classList.add('used');sw.push({w:w,i:i});rSlots();
+    };
+    bank.appendChild(c);
+  });
+  ra.appendChild(bank);
+  var sl=mk('div','bank-lbl');sl.style.marginTop='8px';sl.textContent='並べた順（タップして戻す）';ra.appendChild(sl);
+  var slots=mk('div','slots-wrap');slots.id='sl';
+  var ph=mk('span','sph');ph.textContent='ここに並べる';slots.appendChild(ph);
+  ra.appendChild(slots);card.appendChild(ra);
+  var cb=mk('button','chk-btn');cb.textContent='確認する';
+  cb.onclick=function(){
+    var ans=sw.map(function(x){return x.w;});
+    var ok=JSON.stringify(ans)===JSON.stringify(q.ans);
+    if(ok)score++;
+    this.disabled=true;
+    document.querySelectorAll('.wchip').forEach(function(c){c.style.pointerEvents='none';});
+    document.querySelectorAll('.schip').forEach(function(c){c.style.pointerEvents='none';});
+    showFb(ok,q.fb+(ok?'':' 正解：'+q.ans.join(' ')));
+  };
+  card.appendChild(cb);
+}
+
+function rSlots(){
+  var slots=document.getElementById('sl');
+  slots.innerHTML='';
+  if(!sw.length){var p=mk('span','sph');p.textContent='ここに並べる';slots.appendChild(p);return;}
+  sw.forEach(function(item,si){
+    var c=mk('button','schip');c.textContent=item.w;
+    (function(item,si){
+      c.onclick=function(){
+        document.querySelectorAll('#bk .wchip').forEach(function(bc){
+          if(parseInt(bc.dataset.i)===item.i)bc.classList.remove('used');
+        });
+        sw.splice(si,1);rSlots();
+      };
+    })(item,si);
+    slots.appendChild(c);
+  });
+}
+
+function bFill(card,q){
+  var w=mk('div','fill-wrap');
+  q.parts.forEach(function(p,i){
+    if(i===q.blank){
+      var inp=mk('input','fill-in');inp.id='fi';inp.type='text';inp.placeholder='?';
+      inp.autocomplete='off';inp.autocorrect='off';inp.autocapitalize='off';inp.spellcheck=false;
+      w.appendChild(inp);
+    } else {
+      var s=mk('span','fill-st');s.textContent=p+' ';w.appendChild(s);
+    }
+  });
+  card.appendChild(w);
+  var cb=mk('button','chk-btn');cb.textContent='確認する';
+  cb.onclick=function(){
+    var fi=document.getElementById('fi');
+    var val=(fi.value||'').trim();
+    var ok=val.toLowerCase()===q.ans.toLowerCase();
+    if(ok)score++;
+    fi.disabled=true;
+    this.disabled=true;
+    showFb(ok,q.fb+(ok?'':' 正解：'+q.ans));
+  };
+  card.appendChild(cb);
+}
+
+function showFb(ok,text){
+  var fb=document.getElementById('fb');
+  fb.className='fb '+(ok?'ok':'ng');
+  fb.textContent=(ok?'✓ 正解！ ':'✗ 不正解。')+text;
+  var nb=document.getElementById('nb');if(nb)nb.style.display='block';
+  upd();
+}
+
+function fin(){
+  document.getElementById('pf').style.width='100%';
+  document.getElementById('pl').textContent=qs.length+' / '+qs.length;
+  document.getElementById('sp').textContent=score+'点';
+  var a=document.getElementById('qa');a.innerHTML='';
+  var fc=mk('div','fin-card');
+  var fs=mk('div','fin-score');fs.textContent=score+' / '+qs.length;fc.appendChild(fs);
+  var fl=mk('div','fin-lbl');fl.textContent='正解数';fc.appendChild(fl);
+  var msg=mk('div','fin-msg');
+  var p=Math.round(score/qs.length*100);
+  msg.textContent=p===100?'🎉 パーフェクト！完璧です！':p>=70?'👍 よくできました！少し復習してみよう。':'💪 もう一度チャレンジしてみよう！';
+  fc.appendChild(msg);
+  var rb=mk('button','retry-btn');rb.textContent='もう一度挑戦する';
+  rb.onclick=function(){cur=0;score=0;window.scrollTo(0,0);render();};
+  fc.appendChild(rb);
+  a.appendChild(fc);
+}
+
+render();
+</script>
+</body>
+</html>
