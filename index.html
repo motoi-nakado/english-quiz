@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>立瑛の英語クイズ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  background: #FFF8F0; color: #1A1A1A;
+  min-height: 100vh; cursor: pointer;
+}
+.header {
+  background: linear-gradient(135deg, #E8633A, #FF8C5A);
+  padding: 40px 24px 30px; text-align: center;
+}
+.header h1 { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.header p  { font-size: 14px; color: rgba(255,255,255,0.9); }
+
+.menu { padding: 24px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.menu-item {
+  display: block; background: #fff;
+  border: 2px solid #E0D8CC; border-radius: 18px;
+  padding: 20px 22px; text-decoration: none; color: #1A1A1A;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  touch-action: manipulation;
+}
+.menu-item:active { opacity: 0.75; transform: scale(0.98); }
+.menu-num  { font-size: 11px; font-weight: 800; color: #E8633A; letter-spacing: 1px; margin-bottom: 6px; }
+.menu-title { font-size: 19px; font-weight: 800; margin-bottom: 4px; }
+.menu-desc  { font-size: 12px; color: #888; line-height: 1.5; }
+.menu-arrow { float: right; font-size: 20px; color: #E8633A; margin-top: -2px; }
+
+.footer { text-align: center; padding: 30px; font-size: 12px; color: #bbb; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🇬🇧 立瑛の英語クイズ</h1>
+  <p>好きなクイズをタップしてね！</p>
+</div>
+
+<div class="menu">
+  <a class="menu-item" href="quiz_be_verb.html">
+    <span class="menu-arrow">▶</span>
+    <div class="menu-num">QUIZ 1</div>
+    <div class="menu-title">Be動詞と一般動詞</div>
+    <div class="menu-desc">曜日・単語・文章・質問応答・自己紹介</div>
+  </a>
+
+  <a class="menu-item" href="english_quiz_question.html">
+    <span class="menu-arrow">▶</span>
+    <div class="menu-num">QUIZ 2</div>
+    <div class="menu-title">疑問文クイズ</div>
+    <div class="menu-desc">be動詞・一般動詞の疑問文 穴埋め＆並び替え</div>
+  </a>
+
+  <a class="menu-item" href="english_quiz_negative.html">
+    <span class="menu-arrow">▶</span>
+    <div class="menu-num">QUIZ 3</div>
+    <div class="menu-title">疑問文・否定文クイズ</div>
+    <div class="menu-desc">be動詞・一般動詞の疑問文と否定文 穴埋め＆並び替え</div>
+  </a>
+</div>
+
+<div class="footer">立瑛くん、がんばってね！💪</div>
+
+</body>
+</html>
