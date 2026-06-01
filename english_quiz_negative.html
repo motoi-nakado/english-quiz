@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>疑問文・否定文クイズ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  background: #F5FFF8; color: #1A2E1A;
+  min-height: 100vh; padding-bottom: 80px; cursor: pointer;
+}
+.header {
+  background: linear-gradient(135deg, #2E7D32, #43A047);
+  padding: 18px 20px 14px; text-align: center;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 3px 15px rgba(46,125,50,0.4);
+}
+.header h1 { font-size: 18px; font-weight: 800; color: #fff; }
+.header p  { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 3px; }
+.prog-wrap { background: rgba(255,255,255,0.3); height: 6px; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.prog-bar  { background: #fff; height: 100%; border-radius: 3px; transition: width 0.4s; width: 0%; }
+
+.tabs { display: flex; gap: 8px; padding: 14px 14px 0; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0; background: #fff; border: 1.5px solid #A5D6A7;
+  border-radius: 20px; padding: 9px 16px; font-size: 13px; font-weight: 700;
+  color: #2E7D32; cursor: pointer; touch-action: manipulation;
+  text-decoration: none; display: inline-block;
+}
+.tab.active { background: #2E7D32; border-color: #2E7D32; color: #fff; }
+
+.section { display: none; padding: 14px; }
+.section.active { display: block; }
+
+.sec-title { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #2E7D32; margin-bottom: 4px; }
+.sec-desc  { font-size: 12px; color: #666; margin-bottom: 14px; line-height: 1.6; }
+
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 800;
+  padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; letter-spacing: 0.5px;
+}
+.badge-beq  { background: #E3F2FD; color: #1565C0; }
+.badge-ben  { background: #EDE7F6; color: #6A1B9A; }
+.badge-genq { background: #E8F5E9; color: #2E7D32; }
+.badge-genn { background: #FFF3E0; color: #E65100; }
+.badge-mix  { background: #FCE4EC; color: #C62828; }
+.badge-sort { background: #F3E5F5; color: #7B1FA2; }
+
+.q-card {
+  background: #fff; border: 1.5px solid #C8E6C9;
+  border-radius: 16px; padding: 14px 16px; margin-bottom: 11px;
+  box-shadow: 0 2px 10px rgba(46,125,50,0.08);
+}
+.q-card.ok { border-color: #4CAF50; background: #F1F8E9; }
+.q-card.ng { border-color: #F44336; background: #FFF5F5; }
+.q-num { font-size: 11px; color: #999; margin-bottom: 4px; }
+.q-ja  { font-size: 13px; color: #555; margin-bottom: 8px; line-height: 1.6; }
+.q-en  { font-size: 16px; font-weight: 600; line-height: 2.4; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+
+.hint { font-size: 11px; color: #888; margin-top: 4px; font-style: italic; }
+
+input.ans {
+  border: none; border-bottom: 2.5px solid #A5D6A7;
+  background: transparent; font-size: 16px; font-weight: 700;
+  color: #1A2E1A; padding: 4px 4px 2px; outline: none;
+  -webkit-appearance: none; border-radius: 0; width: 110px;
+}
+input.ans:focus { border-bottom-color: #2E7D32; }
+input.ans.ok { border-bottom-color: #4CAF50; color: #2E7D32; }
+input.ans.ng { border-bottom-color: #F44336; color: #F44336; }
+input.ans.wide   { width: min(170px, 46vw); }
+input.ans.short  { width: min(75px, 23vw); }
+input.ans.xshort { width: min(58px, 19vw); }
+
+.ans-reveal { font-size: 12px; color: #2E7D32; font-weight: 700; margin-top: 6px; display: none; }
+.q-card.ng .ans-reveal { display: block; }
+
+/* 並び替え */
+.sort-area { margin-top: 8px; }
+.sort-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+.sort-answer {
+  display: flex; flex-wrap: wrap; gap: 6px; min-height: 44px;
+  border: 2px dashed #A5D6A7; border-radius: 10px; padding: 6px; background: #F9FFF9;
+}
+.sort-answer.ok { border-color: #4CAF50; background: #F1F8E9; }
+.sort-answer.ng { border-color: #F44336; background: #FFF5F5; }
+.sort-bank { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; min-height: 36px; }
+.word-chip {
+  background: #E8F5E9; color: #2E7D32; border: 1.5px solid #A5D6A7;
+  border-radius: 8px; padding: 6px 12px; font-size: 14px; font-weight: 600;
+  cursor: pointer; touch-action: manipulation; text-decoration: none;
+  display: inline-block; user-select: none; -webkit-user-select: none;
+}
+.word-chip.used   { opacity: 0.3; pointer-events: none; }
+.word-chip.placed { background: #2E7D32; color: #fff; border-color: #2E7D32; }
+
+.btn-area { padding: 18px 14px 0; display: flex; flex-direction: column; gap: 10px; }
+.btn {
+  display: block; width: 100%; padding: 18px 15px;
+  border-radius: 14px; border: none; font-size: 17px; font-weight: 800;
+  cursor: pointer; touch-action: manipulation; text-align: center;
+  text-decoration: none; -webkit-appearance: none;
+}
+.btn:active { opacity: 0.75; }
+.btn-check { background: linear-gradient(135deg, #2E7D32, #43A047); color: #fff; }
+.btn-ans   { background: #1565C0; color: #fff; }
+.btn-reset { background: #fff; color: #1A2E1A; border: 1.5px solid #C8E6C9; }
+
+.score-box {
+  margin: 16px 14px 0; background: #fff; border: 1.5px solid #C8E6C9;
+  border-radius: 16px; padding: 22px; text-align: center; display: none;
+}
+.score-box.show { display: block; }
+.score-emoji { font-size: 40px; display: block; margin-bottom: 8px; }
+.score-num  { font-size: 50px; font-weight: 800; color: #2E7D32; }
+.score-of   { font-size: 18px; color: #999; }
+.score-pct  { font-size: 13px; color: #999; margin-top: 4px; }
+.score-msg  { font-size: 15px; font-weight: 700; color: #1A2E1A; margin-top: 8px; }
+
+.nav-row { display: flex; justify-content: space-between; padding: 12px 14px 0; }
+.nav-btn {
+  display: inline-block; background: #fff; border: 1.5px solid #C8E6C9;
+  border-radius: 12px; padding: 14px 28px; font-size: 15px; font-weight: 700;
+  color: #1A2E1A; cursor: pointer; touch-action: manipulation; text-decoration: none;
+}
+.nav-btn:active { opacity: 0.6; }
+.nav-btn.disabled { opacity: 0.3; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🟢 疑問文・否定文クイズ</h1>
+  <p>Be動詞・一般動詞 中学1年生</p>
+  <div class="prog-wrap"><div class="prog-bar" id="progbar"></div></div>
+</div>
+
+<div class="tabs">
+  <a class="tab active" href="javascript:void(0)" onclick="sw(0);return false;">① be疑問文</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(1);return false;">② be否定文</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(2);return false;">③ 一般疑問</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(3);return false;">④ 一般否定</a>
+  <a class="tab" href="javascript:void(0)" onclick="sw(4);return false;">⑤ 混合</a>
+</div>
+
+<!-- ① be動詞 疑問文 -->
+<div class="section active" id="s0">
+  <div class="sec-title">① be動詞の疑問文</div>
+  <div class="sec-desc">Be動詞を文頭に出す！ Am/Is/Are を主語の前に置こう。</div>
+
+  <div class="q-card">
+    <div class="q-num">Q1</div>
+    <span class="badge badge-beq">be疑問文</span>
+    <div class="q-ja">あなたは学生ですか？</div>
+    <div class="q-en"><input class="ans short" data-a="Are"> you a student?</div>
+    <div class="ans-reveal">✓ Are</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q2</div>
+    <span class="badge badge-beq">be疑問文</span>
+    <div class="q-ja">彼は先生ですか？</div>
+    <div class="q-en"><input class="ans short" data-a="Is"> he a teacher?</div>
+    <div class="ans-reveal">✓ Is</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q3</div>
+    <span class="badge badge-beq">be疑問文</span>
+    <div class="q-ja">彼女は背が高いですか？→ はい、そうです。</div>
+    <div class="q-en">Is she tall? — Yes, she <input class="ans short" data-a="is"> .</div>
+    <div class="ans-reveal">✓ is</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q4</div>
+    <span class="badge badge-beq">be疑問文</span>
+    <div class="q-ja">あなたたちは友達ですか？→ いいえ、ちがいます。</div>
+    <div class="q-en">Are you friends? — No, we're <input class="ans short" data-a="not"> .</div>
+    <div class="ans-reveal">✓ not</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q5</div>
+    <span class="badge badge-sort">並び替え</span>
+    <div class="q-ja">彼らはオーストラリア出身ですか？</div>
+    <div class="sort-area">
+      <div class="sort-label">↓ タップして並べる</div>
+      <div class="sort-answer" id="ans0"></div>
+      <div class="sort-label" style="margin-top:8px">単語</div>
+      <div class="sort-bank" id="bank0"></div>
+    </div>
+    <div class="ans-reveal">✓ Are they from Australia ?</div>
+  </div>
+</div>
+
+<!-- ② be動詞 否定文 -->
+<div class="section" id="s1">
+  <div class="sec-title">② be動詞の否定文</div>
+  <div class="sec-desc">Be動詞の後ろに not を置く！ is not = isn't / are not = aren't</div>
+
+  <div class="q-card">
+    <div class="q-num">Q6</div>
+    <span class="badge badge-ben">be否定文</span>
+    <div class="q-ja">私は疲れていません。</div>
+    <div class="q-en">I <input class="ans short" data-a="am not|'m not"> tired.</div>
+    <div class="ans-reveal">✓ am not（または 'm not）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q7</div>
+    <span class="badge badge-ben">be否定文</span>
+    <div class="q-ja">彼は医者ではありません。</div>
+    <div class="q-en">He <input class="ans wide" data-a="is not|isn't"> a doctor.</div>
+    <div class="ans-reveal">✓ is not（または isn't）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q8</div>
+    <span class="badge badge-ben">be否定文</span>
+    <div class="q-ja">私たちは同じクラスではありません。</div>
+    <div class="q-en">We <input class="ans wide" data-a="are not|aren't"> in the same class.</div>
+    <div class="ans-reveal">✓ are not（または aren't）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q9</div>
+    <span class="badge badge-ben">be否定文</span>
+    <div class="q-ja">次の文を否定文に。 She is kind.</div>
+    <div class="q-en">She <input class="ans wide" data-a="is not|isn't"> kind.</div>
+    <div class="ans-reveal">✓ is not（または isn't）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q10</div>
+    <span class="badge badge-sort">並び替え</span>
+    <div class="q-ja">これは私のかばんではありません。</div>
+    <div class="sort-area">
+      <div class="sort-label">↓ タップして並べる</div>
+      <div class="sort-answer" id="ans1"></div>
+      <div class="sort-label" style="margin-top:8px">単語</div>
+      <div class="sort-bank" id="bank1"></div>
+    </div>
+    <div class="ans-reveal">✓ This is not my bag .</div>
+  </div>
+</div>
+
+<!-- ③ 一般動詞 疑問文 -->
+<div class="section" id="s2">
+  <div class="sec-title">③ 一般動詞の疑問文</div>
+  <div class="sec-desc">文頭に Do / Does を置く！三人称単数（he/she/it）は Does。動詞の s は消える！</div>
+
+  <div class="q-card">
+    <div class="q-num">Q11</div>
+    <span class="badge badge-genq">一般疑問文</span>
+    <div class="q-ja">あなたはサッカーをしますか？</div>
+    <div class="q-en"><input class="ans short" data-a="Do"> you play soccer?</div>
+    <div class="ans-reveal">✓ Do</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q12</div>
+    <span class="badge badge-genq">一般疑問文</span>
+    <div class="q-ja">彼は英語を勉強しますか？</div>
+    <div class="q-en"><input class="ans short" data-a="Does"> he study English?</div>
+    <div class="hint">💡 he → Does を使う。study の s は消える！</div>
+    <div class="ans-reveal">✓ Does（study → study のまま）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q13</div>
+    <span class="badge badge-genq">一般疑問文</span>
+    <div class="q-ja">彼女は猫を飼っていますか？→ はい、飼っています。</div>
+    <div class="q-en">Does she have a cat? — Yes, she <input class="ans short" data-a="does"> .</div>
+    <div class="ans-reveal">✓ does</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q14</div>
+    <span class="badge badge-genq">一般疑問文</span>
+    <div class="q-ja">次の文を疑問文に。 She likes music.</div>
+    <div class="q-en"><input class="ans short" data-a="Does"> she like music?</div>
+    <div class="hint">💡 likes → like（s が消える！）</div>
+    <div class="ans-reveal">✓ Does（likes → like に戻る）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q15</div>
+    <span class="badge badge-sort">並び替え</span>
+    <div class="q-ja">あなたは毎朝朝食を食べますか？</div>
+    <div class="sort-area">
+      <div class="sort-label">↓ タップして並べる</div>
+      <div class="sort-answer" id="ans2"></div>
+      <div class="sort-label" style="margin-top:8px">単語</div>
+      <div class="sort-bank" id="bank2"></div>
+    </div>
+    <div class="ans-reveal">✓ Do you eat breakfast every morning ?</div>
+  </div>
+</div>
+
+<!-- ④ 一般動詞 否定文 -->
+<div class="section" id="s3">
+  <div class="sec-title">④ 一般動詞の否定文</div>
+  <div class="sec-desc">don't / doesn't を動詞の前に置く！三人称単数は doesn't。動詞の s は消える！</div>
+
+  <div class="q-card">
+    <div class="q-num">Q16</div>
+    <span class="badge badge-genn">一般否定文</span>
+    <div class="q-ja">私はテニスをしません。</div>
+    <div class="q-en">I <input class="ans short" data-a="don't"> play tennis.</div>
+    <div class="ans-reveal">✓ don't</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q17</div>
+    <span class="badge badge-genn">一般否定文</span>
+    <div class="q-ja">彼は納豆が好きではありません。</div>
+    <div class="q-en">He <input class="ans short" data-a="doesn't"> like natto.</div>
+    <div class="hint">💡 he → doesn't。likes ではなく like！</div>
+    <div class="ans-reveal">✓ doesn't（likes → like に戻る）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q18</div>
+    <span class="badge badge-genn">一般否定文</span>
+    <div class="q-ja">次の文を否定文に。 She watches TV every day.</div>
+    <div class="q-en">She <input class="ans short" data-a="doesn't"> watch TV every day.</div>
+    <div class="hint">💡 watches → watch（es が消える！）</div>
+    <div class="ans-reveal">✓ doesn't（watches → watch）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q19</div>
+    <span class="badge badge-genn">一般否定文</span>
+    <div class="q-ja">私たちは日本語を話しません。</div>
+    <div class="q-en">We <input class="ans short" data-a="don't"> speak Japanese.</div>
+    <div class="ans-reveal">✓ don't</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q20</div>
+    <span class="badge badge-sort">並び替え</span>
+    <div class="q-ja">彼女は朝ごはんを食べません。</div>
+    <div class="sort-area">
+      <div class="sort-label">↓ タップして並べる</div>
+      <div class="sort-answer" id="ans3"></div>
+      <div class="sort-label" style="margin-top:8px">単語</div>
+      <div class="sort-bank" id="bank3"></div>
+    </div>
+    <div class="ans-reveal">✓ She doesn't eat breakfast .</div>
+  </div>
+</div>
+
+<!-- ⑤ 混合 -->
+<div class="section" id="s4">
+  <div class="sec-title">⑤ 混合問題</div>
+  <div class="sec-desc">be動詞か一般動詞か、疑問文か否定文か、自分で判断しよう！</div>
+
+  <div class="q-card">
+    <div class="q-num">Q21</div>
+    <span class="badge badge-mix">混合</span>
+    <div class="q-ja">「彼は背が高いですか？」— Is / Are / Do / Does ?</div>
+    <div class="q-en"><input class="ans short" data-a="Is"> he tall?</div>
+    <div class="ans-reveal">✓ Is（be動詞・疑問文）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q22</div>
+    <span class="badge badge-mix">混合</span>
+    <div class="q-ja">「あなたは野球が好きですか？」— Is / Are / Do / Does ?</div>
+    <div class="q-en"><input class="ans short" data-a="Do"> you like baseball?</div>
+    <div class="ans-reveal">✓ Do（一般動詞・疑問文）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q23</div>
+    <span class="badge badge-mix">混合</span>
+    <div class="q-ja">「私は眠くありません。」— am not / don't ?</div>
+    <div class="q-en">I <input class="ans wide" data-a="am not|'m not"> sleepy.</div>
+    <div class="ans-reveal">✓ am not（be動詞・否定文）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q24</div>
+    <span class="badge badge-mix">混合</span>
+    <div class="q-ja">次の文を疑問文に。 Ken plays basketball.</div>
+    <div class="q-en"><input class="ans short" data-a="Does"> Ken play basketball?</div>
+    <div class="hint">💡 plays → play（s が消える！）</div>
+    <div class="ans-reveal">✓ Does（plays → play）</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-num">Q25</div>
+    <span class="badge badge-sort">並び替え</span>
+    <div class="q-ja">彼らはサッカー選手ではありません。</div>
+    <div class="sort-area">
+      <div class="sort-label">↓ タップして並べる</div>
+      <div class="sort-answer" id="ans4"></div>
+      <div class="sort-label" style="margin-top:8px">単語</div>
+      <div class="sort-bank" id="bank4"></div>
+    </div>
+    <div class="ans-reveal">✓ They are not soccer players .</div>
+  </div>
+</div>
+
+<!-- ボタン -->
+<div class="btn-area">
+  <a class="btn btn-check" href="javascript:void(0)" onclick="check();return false;">✓ 採点する</a>
+  <a class="btn btn-ans"   href="javascript:void(0)" onclick="showAns();return false;">💡 答えを見る</a>
+  <a class="btn btn-reset" href="javascript:void(0)" onclick="doReset();return false;">↺ リセット</a>
+</div>
+
+<div class="score-box" id="scorebox">
+  <span class="score-emoji" id="semoji">🎉</span>
+  <div><span class="score-num" id="snum">0</span><span class="score-of" id="sof"> / 0</span></div>
+  <div class="score-pct" id="spct"></div>
+  <div class="score-msg" id="smsg"></div>
+</div>
+
+<div class="nav-row">
+  <a class="nav-btn" id="btnPrev" href="javascript:void(0)" onclick="sw(cur-1);return false;">◀ 前へ</a>
+  <a class="nav-btn" id="btnNext" href="javascript:void(0)" onclick="sw(cur+1);return false;">次へ ▶</a>
+</div>
+
+<script>
+var cur = 0;
+var total = 5;
+
+var sortData = [
+  { words: ['Are','they','from','Australia','?'], answer: 'Are they from Australia ?' },
+  { words: ['This','is','not','my','bag','.'], answer: 'This is not my bag .' },
+  { words: ['Do','you','eat','breakfast','every','morning','?'], answer: 'Do you eat breakfast every morning ?' },
+  { words: ["She","doesn't","eat","breakfast",'.'], answer: "She doesn't eat breakfast ." },
+  { words: ['They','are','not','soccer','players','.'], answer: 'They are not soccer players .' }
+];
+
+var sortState = [[],[],[],[],[]];
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length-1; i > 0; i--) {
+    var j = Math.floor(Math.random()*(i+1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function initSort() {
+  for (var i = 0; i < sortData.length; i++) {
+    sortState[i] = [];
+    renderSort(i, shuffle(sortData[i].words));
+  }
+}
+
+function renderSort(idx, words) {
+  var bank = document.getElementById('bank'+idx);
+  var ansEl = document.getElementById('ans'+idx);
+  bank.innerHTML = '';
+  ansEl.innerHTML = '';
+  ansEl.className = 'sort-answer';
+  for (var j = 0; j < words.length; j++) {
+    (function(word, si, bi) {
+      var chip = document.createElement('a');
+      chip.href = 'javascript:void(0)';
+      chip.className = 'word-chip';
+      chip.textContent = word;
+      chip.onclick = function() { moveToAnswer(si, word, chip); return false; };
+      bank.appendChild(chip);
+    })(words[j], idx, j);
+  }
+}
+
+function moveToAnswer(idx, word, chip) {
+  if (chip.classList.contains('used')) return;
+  chip.classList.add('used');
+  sortState[idx].push(word);
+  var ansEl = document.getElementById('ans'+idx);
+  var placed = document.createElement('a');
+  placed.href = 'javascript:void(0)';
+  placed.className = 'word-chip placed';
+  placed.textContent = word;
+  placed.onclick = (function(si, w, c, p) {
+    return function() {
+      var idx2 = sortState[si].indexOf(w);
+      if (idx2 >= 0) sortState[si].splice(idx2, 1);
+      c.classList.remove('used');
+      if (p.parentNode) p.parentNode.removeChild(p);
+      updateProg();
+      return false;
+    };
+  })(idx, word, chip, placed);
+  ansEl.appendChild(placed);
+  updateProg();
+}
+
+function sw(n) {
+  if (n < 0 || n >= total) return;
+  var secs = document.querySelectorAll('.section');
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < secs.length; i++) secs[i].style.display = (i===n)?'block':'none';
+  for (var j = 0; j < tabs.length; j++) tabs[j].className = (j===n)?'tab active':'tab';
+  cur = n;
+  document.getElementById('scorebox').style.display = 'none';
+  document.getElementById('btnPrev').className = (cur===0)?'nav-btn disabled':'nav-btn';
+  document.getElementById('btnNext').className = (cur===total-1)?'nav-btn disabled':'nav-btn';
+  window.scrollTo(0,0);
+}
+
+function norm(s) { return s.trim().toLowerCase().replace(/\s+/g,' '); }
+
+function check() {
+  var sec = document.getElementById('s'+cur);
+  var correct = 0, tot = 0;
+
+  var cards = sec.querySelectorAll('.q-card:not([data-sort])');
+  for (var i = 0; i < cards.length; i++) {
+    var ins = cards[i].querySelectorAll('input.ans');
+    if (ins.length === 0) continue;
+    var cardOk = true;
+    for (var j = 0; j < ins.length; j++) {
+      tot++;
+      ins[j].className = ins[j].className.replace(/\b(ok|ng)\b/g,'').trim();
+      var expected = (ins[j].getAttribute('data-a')||'').split('|').map(norm);
+      if (expected.indexOf(norm(ins[j].value)) >= 0) {
+        ins[j].className += ' ok'; correct++;
+      } else {
+        ins[j].className += ' ng'; cardOk = false;
+      }
+    }
+    cards[i].className = cards[i].className.replace(/\b(ok|ng)\b/g,'').trim() + ' ' + (cardOk?'ok':'ng');
+  }
+
+  // 並び替え採点
+  var sortEls = sec.querySelectorAll('.sort-answer');
+  for (var k = 0; k < sortEls.length; k++) {
+    var ansId = sortEls[k].id;
+    var idx = parseInt(ansId.replace('ans',''));
+    if (isNaN(idx)) continue;
+    tot++;
+    var userAns = sortState[idx].join(' ');
+    var card2 = sortEls[k].closest('.q-card');
+    card2.className = card2.className.replace(/\b(ok|ng)\b/g,'').trim();
+    sortEls[k].className = 'sort-answer';
+    if (norm(userAns) === norm(sortData[idx].answer)) {
+      correct++; card2.className += ' ok'; sortEls[k].className += ' ok';
+    } else {
+      card2.className += ' ng'; sortEls[k].className += ' ng';
+    }
+  }
+
+  var box = document.getElementById('scorebox');
+  box.style.display = 'block';
+  document.getElementById('snum').textContent = correct;
+  document.getElementById('sof').textContent = ' / ' + tot;
+  var pct = tot ? Math.round(correct/tot*100) : 0;
+  document.getElementById('spct').textContent = pct + '%';
+  var emoji='💪', msg='もう一度チャレンジしよう！';
+  if(pct===100){emoji='🎉';msg='全問正解！完璧です！';}
+  else if(pct>=80){emoji='😄';msg='とても良くできました！';}
+  else if(pct>=60){emoji='👍';msg='よくできました！';}
+  document.getElementById('semoji').textContent = emoji;
+  document.getElementById('smsg').textContent = msg;
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  updateProg();
+}
+
+function showAns() {
+  var sec = document.getElementById('s'+cur);
+  var cards = sec.querySelectorAll('.q-card');
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].className = cards[i].className.replace(/\b(ok|ng)\b/g,'').trim() + ' ok';
+    var ins = cards[i].querySelectorAll('input.ans');
+    for (var j = 0; j < ins.length; j++) {
+      ins[j].value = (ins[j].getAttribute('data-a')||'').split('|')[0];
+      ins[j].className = ins[j].className.replace(/\b(ok|ng)\b/g,'').trim() + ' ok';
+    }
+  }
+  var sortEls = sec.querySelectorAll('.sort-answer');
+  for (var k = 0; k < sortEls.length; k++) {
+    var idx = parseInt(sortEls[k].id.replace('ans',''));
+    if (isNaN(idx)) continue;
+    sortState[idx] = sortData[idx].answer.split(' ');
+    sortEls[k].innerHTML = '';
+    sortEls[k].className = 'sort-answer ok';
+    var ws = sortData[idx].answer.split(' ');
+    for (var w = 0; w < ws.length; w++) {
+      var chip = document.createElement('span');
+      chip.className = 'word-chip placed';
+      chip.textContent = ws[w];
+      sortEls[k].appendChild(chip);
+    }
+    var bank = document.getElementById('bank'+idx);
+    var chips = bank.querySelectorAll('.word-chip');
+    for (var b = 0; b < chips.length; b++) chips[b].classList.add('used');
+  }
+  document.getElementById('scorebox').style.display = 'none';
+  updateProg();
+}
+
+function doReset() {
+  var sec = document.getElementById('s'+cur);
+  var cards = sec.querySelectorAll('.q-card');
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].className = cards[i].className.replace(/\b(ok|ng)\b/g,'').trim();
+    var ins = cards[i].querySelectorAll('input.ans');
+    for (var j = 0; j < ins.length; j++) {
+      ins[j].value = '';
+      ins[j].className = ins[j].className.replace(/\b(ok|ng)\b/g,'').trim();
+    }
+  }
+  var sortEls = sec.querySelectorAll('.sort-answer');
+  for (var k = 0; k < sortEls.length; k++) {
+    var idx = parseInt(sortEls[k].id.replace('ans',''));
+    if (isNaN(idx)) continue;
+    sortState[idx] = [];
+    renderSort(idx, shuffle(sortData[idx].words));
+  }
+  document.getElementById('scorebox').style.display = 'none';
+  updateProg();
+}
+
+function updateProg() {
+  var all = document.querySelectorAll('input.ans');
+  var filled = 0;
+  for (var i = 0; i < all.length; i++) if (all[i].value.trim()!=='') filled++;
+  var sortDone = 0;
+  for (var k = 0; k < sortData.length; k++) if (sortState[k].length > 0) sortDone++;
+  var t = all.length + sortData.length;
+  var d = filled + sortDone;
+  document.getElementById('progbar').style.width = (t ? Math.round(d/t*100) : 0) + '%';
+}
+
+var allInputs = document.querySelectorAll('input.ans');
+for (var i = 0; i < allInputs.length; i++) allInputs[i].addEventListener('input', updateProg);
+
+initSort();
+sw(0);
+</script>
+</body>
+</html>
