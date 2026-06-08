@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>英語「2つの国」ドリル</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --be: #185FA5; --be-l: #E6F1FB; --be-d: #0C447C;
+  --ge: #0F6E56; --ge-l: #E1F5EE; --ge-d: #085041;
+  --ok: #3B6D11; --ok-l: #EAF3DE; --ok-d: #173404;
+  --ng: #A32D2D; --ng-l: #FCEBEB;
+  --bg: #f5f5f3; --sur: #ffffff; --sur2: #f1efe8;
+  --tx: #1a1a1a; --tx2: #5f5e5a; --tx3: #888780;
+  --bd: rgba(0,0,0,0.12); --bd2: rgba(0,0,0,0.22);
+  --r: 12px; --rs: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --be: #378ADD; --be-l: #042C53; --be-d: #B5D4F4;
+    --ge: #1D9E75; --ge-l: #04342C; --ge-d: #9FE1CB;
+    --ok: #639922; --ok-l: #173404; --ok-d: #C0DD97;
+    --ng: #E24B4A; --ng-l: #501313;
+    --bg: #1a1a18; --sur: #2c2c2a; --sur2: #222220;
+    --tx: #f0ede8; --tx2: #b4b2a9; --tx3: #888780;
+    --bd: rgba(255,255,255,0.1); --bd2: rgba(255,255,255,0.2);
+  }
+}
+html, body { min-height: 100%; background: var(--bg); font-family: -apple-system, 'Hiragino Sans', 'Helvetica Neue', sans-serif; color: var(--tx); }
+#app { max-width: 480px; margin: 0 auto; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* HOME */
+.hero { background: var(--sur); border-radius: var(--r); padding: 24px 20px 20px; text-align: center; margin-bottom: 14px; border: 0.5px solid var(--bd); }
+.flag-row { display: flex; justify-content: center; gap: 14px; margin-bottom: 18px; }
+.flag { width: 86px; height: 86px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 700; }
+.flag.be { background: var(--be-l); color: var(--be-d); border: 2px solid var(--be); }
+.flag.ge { background: var(--ge-l); color: var(--ge-d); border: 2px solid var(--ge); }
+.flag-icon { font-size: 32px; line-height: 1; }
+.home-title { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+.home-sub { font-size: 13px; color: var(--tx2); line-height: 1.7; }
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.sbtn { background: var(--sur); border: 0.5px solid var(--bd2); border-radius: var(--r); padding: 16px 10px; text-align: center; cursor: pointer; -webkit-user-select: none; }
+.sbtn:active { background: var(--sur2); transform: scale(0.97); }
+.snum { font-size: 10px; color: var(--tx3); margin-bottom: 4px; font-weight: 700; letter-spacing: 0.06em; }
+.stitle { font-size: 13px; font-weight: 700; color: var(--tx); line-height: 1.5; }
+.allbtn { width: 100%; background: var(--be); border: none; color: #fff; border-radius: var(--r); padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; -webkit-user-select: none; }
+.allbtn:active { opacity: 0.8; transform: scale(0.98); }
+
+/* QUIZ */
+.qheader { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.backbtn { background: var(--sur); border: 0.5px solid var(--bd2); border-radius: var(--rs); padding: 8px 14px; cursor: pointer; color: var(--tx2); font-size: 15px; font-weight: 600; -webkit-user-select: none; }
+.backbtn:active { background: var(--sur2); }
+.qtitle { font-size: 14px; font-weight: 700; flex: 1; }
+.qcnt { font-size: 13px; color: var(--tx3); }
+.pbar { height: 5px; background: var(--sur2); border-radius: 99px; margin-bottom: 16px; overflow: hidden; }
+.pfill { height: 100%; background: var(--be); border-radius: 99px; transition: width 0.3s ease; }
+.qcard { background: var(--sur); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 18px; margin-bottom: 12px; }
+.qtag { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px; margin-bottom: 10px; letter-spacing: 0.04em; }
+.qtag.s1 { background: #FAEEDA; color: #633806; }
+.qtag.s2 { background: #E6F1FB; color: #0C447C; }
+.qtag.s3 { background: #FCEBEB; color: #791F1F; }
+@media (prefers-color-scheme: dark) {
+  .qtag.s1 { background: #412402; color: #FAC775; }
+  .qtag.s2 { background: #042C53; color: #B5D4F4; }
+  .qtag.s3 { background: #501313; color: #F7C1C1; }
+}
+.qtext { font-size: 15px; line-height: 1.75; margin-bottom: 6px; white-space: pre-wrap; }
+.qhint { font-size: 12px; color: var(--tx3); line-height: 1.5; }
+.choices { display: grid; gap: 8px; margin-bottom: 12px; }
+.choices.c2 { grid-template-columns: 1fr 1fr; }
+.choices.c1 { grid-template-columns: 1fr; }
+.cbtn { background: var(--sur); border: 1px solid var(--bd2); border-radius: var(--rs); padding: 14px 10px; font-size: 13px; color: var(--tx); cursor: pointer; text-align: center; line-height: 1.5; -webkit-user-select: none; font-family: inherit; }
+.cbtn:active:not(:disabled) { transform: scale(0.97); background: var(--sur2); }
+.cbtn.ok { background: var(--ok-l); border-color: var(--ok); color: var(--ok-d); font-weight: 700; }
+.cbtn.ng { background: var(--ng-l); border-color: var(--ng); color: var(--ng); }
+.cbtn:disabled { cursor: default; }
+.ansinput { width: 100%; padding: 13px 14px; font-size: 15px; border: 1px solid var(--bd2); border-radius: var(--rs); background: var(--sur); color: var(--tx); -webkit-appearance: none; font-family: inherit; }
+.ansinput:focus { outline: none; border-color: var(--be); }
+.ansinput.ok { border-color: var(--ok); background: var(--ok-l); color: var(--ok-d); }
+.ansinput.ng { border-color: var(--ng); background: var(--ng-l); }
+.subbtn { width: 100%; padding: 14px; background: var(--be-l); border: 1px solid var(--be); color: var(--be-d); border-radius: var(--rs); font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px; font-family: inherit; -webkit-user-select: none; }
+.subbtn:active:not(:disabled) { transform: scale(0.98); }
+.subbtn:disabled { opacity: 0.4; cursor: default; }
+.fb { border-radius: var(--rs); padding: 13px 14px; font-size: 13px; line-height: 1.7; margin-bottom: 10px; display: none; white-space: pre-wrap; }
+.fb.show { display: block; }
+.fb.ok { background: var(--ok-l); color: var(--ok-d); border-left: 3px solid var(--ok); }
+.fb.ng { background: var(--ng-l); color: var(--ng); border-left: 3px solid var(--ng); }
+.fb b { display: block; margin-bottom: 4px; font-size: 14px; }
+.nxtbtn { width: 100%; padding: 14px; background: var(--be); border: none; color: #fff; border-radius: var(--rs); font-size: 15px; font-weight: 700; cursor: pointer; display: none; font-family: inherit; -webkit-user-select: none; }
+.nxtbtn.show { display: block; }
+.nxtbtn:active { opacity: 0.8; }
+
+/* RESULT */
+.rcrd { background: var(--sur); border-radius: var(--r); padding: 28px 20px; text-align: center; border: 0.5px solid var(--bd); margin-bottom: 14px; }
+.scircle { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--be); background: var(--be-l); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 18px; }
+.snum { font-size: 34px; font-weight: 700; color: var(--be-d); line-height: 1; }
+.sdenom { font-size: 12px; color: var(--tx2); margin-top: 2px; }
+.rmsg { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.rsub { font-size: 13px; color: var(--tx2); line-height: 1.7; }
+.retrybtn { width: 100%; padding: 14px; margin-bottom: 10px; background: var(--be); border: none; color: #fff; border-radius: var(--r); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; -webkit-user-select: none; }
+.retrybtn:active { opacity: 0.8; }
+.homebtn2 { width: 100%; padding: 14px; background: var(--sur); border: 0.5px solid var(--bd2); color: var(--tx2); border-radius: var(--r); font-size: 14px; cursor: pointer; font-family: inherit; -webkit-user-select: none; }
+.homebtn2:active { background: var(--sur2); }
+.revlist { margin-top: 18px; }
+.revtitle { font-size: 12px; color: var(--tx3); font-weight: 700; margin-bottom: 10px; letter-spacing: 0.06em; }
+.revitem { background: var(--sur); border: 0.5px solid var(--bd); border-radius: var(--rs); padding: 12px 14px; margin-bottom: 8px; font-size: 13px; line-height: 1.7; }
+.revq { font-size: 11px; color: var(--tx3); display: block; margin-bottom: 2px; }
+.revans { color: var(--ok); font-weight: 700; }
+.revexp { font-size: 11px; color: var(--tx2); display: block; margin-top: 2px; }
+.allok { background: var(--ok-l); border: 0.5px solid var(--ok); border-radius: var(--rs); padding: 16px; text-align: center; color: var(--ok-d); font-weight: 700; font-size: 14px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HOME -->
+<div id="s-home" class="screen active">
+  <div class="hero">
+    <div class="flag-row">
+      <div class="flag be"><span class="flag-icon">🌍</span>be動詞の国</div>
+      <div class="flag ge"><span class="flag-icon">🏃</span>一般動詞の国</div>
+    </div>
+    <div class="home-title">英語の「2つの国」ドリル</div>
+    <div class="home-sub">be動詞と一般動詞のルールを<br>マスターしよう！3つのステージに挑戦！</div>
+  </div>
+  <div class="sgrid">
+    <button class="sbtn" onclick="startStage(0)">
+      <div class="snum">STAGE 1</div>
+      <div class="stitle">どっちの国？<br>見分けクイズ</div>
+    </button>
+    <button class="sbtn" onclick="startStage(1)">
+      <div class="snum">STAGE 2</div>
+      <div class="stitle">ルール通りに<br>変身！</div>
+    </button>
+    <button class="sbtn" onclick="startStage(2)" style="grid-column:span 2">
+      <div class="snum">STAGE 3</div>
+      <div class="stitle">⚔️ 間違い探し・ボスを倒せ！</div>
+    </button>
+  </div>
+  <button class="allbtn" onclick="startStage(-1)">▶ 全問に挑戦する（13問）</button>
+</div>
+
+<!-- QUIZ -->
+<div id="s-quiz" class="screen">
+  <div class="qheader">
+    <button class="backbtn" onclick="goHome()">← 戻る</button>
+    <span class="qtitle" id="qtitle"></span>
+    <span class="qcnt" id="qcnt"></span>
+  </div>
+  <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+  <div class="qcard">
+    <span class="qtag" id="qtag"></span>
+    <div class="qtext" id="qtext"></div>
+    <div class="qhint" id="qhint"></div>
+  </div>
+  <div id="carea"></div>
+  <div id="iarea" style="display:none; margin-bottom:12px;">
+    <input class="ansinput" type="text" id="ainput" placeholder="英文を入力してください"
+      autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+  </div>
+  <button class="subbtn" id="subbtn" onclick="submitAns()">答えを確認</button>
+  <div class="fb" id="fb"></div>
+  <button class="nxtbtn" id="nxtbtn" onclick="nextQ()">次の問題へ →</button>
+</div>
+
+<!-- RESULT -->
+<div id="s-result" class="screen">
+  <div class="rcrd">
+    <div class="scircle">
+      <span class="snum" id="snum">0</span>
+      <span class="sdenom" id="sdenom">/0問</span>
+    </div>
+    <div class="rmsg" id="rmsg"></div>
+    <div class="rsub" id="rsub"></div>
+  </div>
+  <button class="retrybtn" onclick="retry()">🔄 もう一度挑戦！</button>
+  <button class="homebtn2" onclick="goHome()">🏠 ホームへ戻る</button>
+  <div id="revwrap"></div>
+</div>
+
+</div>
+<script>
+var QS=[
+  {st:1,sl:"ステージ1・見分け",tp:"ch",
+   tx:"① 私はサッカーが好きです。\nどちらの国の動詞を使う？",
+   hi:"「動き（アクション）」はある？",
+   ch:["be動詞の国","一般動詞の国"],
+   an:"一般動詞の国",
+   ex:"「好き（like）」は心のアクション\n→ 一般動詞の国！"},
+  {st:1,sl:"ステージ1・見分け",tp:"ch",
+   tx:"② あなたは中学生です。\nどちらの国の動詞を使う？",
+   hi:"「〜です」はどちらの国？",
+   ch:["be動詞の国","一般動詞の国"],
+   an:"be動詞の国",
+   ex:"「〜です」はbe動詞の国の印！\n（You are a junior high school student.）"},
+  {st:1,sl:"ステージ1・見分け",tp:"ch",
+   tx:"③ 彼は毎日英語を勉強します。\nどちらの国の動詞を使う？",
+   hi:"「勉強する」は何かな？",
+   ch:["be動詞の国","一般動詞の国"],
+   an:"一般動詞の国",
+   ex:"「勉強する（study）」は頭を使うアクション\n→ 一般動詞の国！"},
+  {st:1,sl:"ステージ1・見分け",tp:"ch",
+   tx:"④ 私のノートは机の上にあります。\nどちらの国の動詞を使う？",
+   hi:"「ある・いる」はどちら？",
+   ch:["be動詞の国","一般動詞の国"],
+   an:"be動詞の国",
+   ex:"「ある・いる」は状態を表す → be動詞の国！\n（My notebook is on the desk.）"},
+  {st:2,sl:"ステージ2・変身",tp:"ch",
+   tx:"⑤ You are a doctor.\nこの文を【否定文】に変えると？",
+   hi:"be動詞の否定文：be動詞のすぐ後ろに not を置く！",
+   ch:["You not are a doctor.","You are not a doctor.","You don't are a doctor.","Do you are a doctor?"],
+   an:"You are not a doctor.",
+   ex:"be動詞（are）のすぐ後ろに not を置くだけ！\nYou are not a doctor.\n（短縮形 aren't も○）"},
+  {st:2,sl:"ステージ2・変身",tp:"ch",
+   tx:"⑥ This is your bike.\nこの文を【疑問文】に変えると？",
+   hi:"be動詞が先頭にジャンプ！",
+   ch:["Is this your bike?","Do this is your bike?","This is your bike?","Does this is your bike?"],
+   an:"Is this your bike?",
+   ex:"be動詞（is）が主語を飛び越えて先頭へジャンプ！\nIs this your bike?"},
+  {st:2,sl:"ステージ2・変身",tp:"ch",
+   tx:"⑦ You play the piano.\nこの文を【否定文】に変えると？",
+   hi:"一般動詞の否定文：助っ人 don't を前に挟む！",
+   ch:["You are not play the piano.","You not play the piano.","You don't play the piano.","Don't you play the piano?"],
+   an:"You don't play the piano.",
+   ex:"一般動詞は弱い！助っ人 don't を前に挟む。\nYou don't play the piano."},
+  {st:2,sl:"ステージ2・変身",tp:"ch",
+   tx:"⑧ You watch TV.\nこの文を【疑問文】に変えると？",
+   hi:"一般動詞の疑問文：先頭に助っ人 Do を登場させる！",
+   ch:["Are you watch TV?","Do you watch TV?","You do watch TV?","Watch you TV?"],
+   an:"Do you watch TV?",
+   ex:"先頭に助っ人 Do を登場させる！\nDo you watch TV?"},
+  {st:2,sl:"ステージ2・変身",tp:"ch",
+   tx:"⑨ Are you a student? への答えは？\n「はい、そうです」",
+   hi:"be動詞の疑問文への答え方は？",
+   ch:["Yes, I do.","Yes, I am.","Yes, I are.","Yes, I be."],
+   an:"Yes, I am.",
+   ex:"be動詞（Are）の疑問文には be動詞で答える！\nYes, I am.  /  No, I am not."},
+  {st:2,sl:"ステージ2・変身",tp:"ch",
+   tx:"⑩ Do you like music? への答えは？\n「はい、好きです」",
+   hi:"一般動詞の疑問文への答え方は？",
+   ch:["Yes, I am.","Yes, I like.","Yes, I do.","Yes, I does."],
+   an:"Yes, I do.",
+   ex:"一般動詞（Do）の疑問文には do で答える！\nYes, I do.  /  No, I don't."},
+  {st:3,sl:"ステージ3・ボス戦",tp:"ch",
+   tx:"⑪ 間違いを見つけよう！\n\n「Do you are a student?」\n正しい文はどれ？",
+   hi:"「〜ですか（生徒ですか）」→ どちらの国？",
+   ch:["Are you a student?","Do you a student?","You are a student?","Is you a student?"],
+   an:"Are you a student?",
+   ex:"「生徒ですか」= be動詞の国！\nDo は一般動詞の助っ人なので不要。\nbe動詞 Are が先頭にジャンプ！\n→ Are you a student?"},
+  {st:3,sl:"ステージ3・ボス戦",tp:"ch",
+   tx:"⑫ 間違いを見つけよう！\n\n「I am not like music.」\n正しい文はどれ？",
+   hi:"「好き（like）」はどちらの国の動詞？",
+   ch:["I am not music.","I don't like music.","I like not music.","I am not liking music."],
+   an:"I don't like music.",
+   ex:"「好き（like）」は一般動詞なので am は不要！\n一般動詞の否定 → 助っ人 don't を使って\n→ I don't like music."},
+  {st:3,sl:"ステージ3・ボス戦",tp:"ch",
+   tx:"⑬ まとめ問題：正しい英文はどれ？\n\n「あなたはギターを弾きますか？」",
+   hi:"「弾く（play）」は一般動詞！疑問文の作り方は？",
+   ch:["Are you play the guitar?","Do you play the guitar?","You play the guitar?","Does you play guitar?"],
+   an:"Do you play the guitar?",
+   ex:"「弾く（play）」は一般動詞の国！\n疑問文 → 先頭に Do を登場させる。\n→ Do you play the guitar?"}
+];
+
+var STAGES=[
+  {idx:[0,1,2,3],lb:"ステージ 1：見分けクイズ"},
+  {idx:[4,5,6,7,8,9],lb:"ステージ 2：変身！"},
+  {idx:[10,11,12],lb:"ステージ 3：ボス戦"},
+  {idx:[0,1,2,3,4,5,6,7,8,9,10,11,12],lb:"全問挑戦（13問）"}
+];
+
+var qs=[],cur=0,sc=0,ans=[],stgIdx=3,done=false;
+
+function goHome(){show('home');}
+function show(nm){
+  var ss=document.querySelectorAll('.screen');
+  for(var i=0;i<ss.length;i++) ss[i].classList.remove('active');
+  document.getElementById('s-'+nm).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startStage(idx){
+  stgIdx=idx===-1?3:idx;
+  var s=STAGES[stgIdx];
+  qs=[];
+  for(var i=0;i<s.idx.length;i++) qs.push(QS[s.idx[i]]);
+  cur=0;sc=0;ans=[];
+  document.getElementById('qtitle').textContent=s.lb;
+  show('quiz');
+  renderQ();
+}
+
+function renderQ(){
+  done=false;
+  var q=qs[cur],tot=qs.length;
+  document.getElementById('pfill').style.width=(cur/tot*100)+'%';
+  document.getElementById('qcnt').textContent=(cur+1)+' / '+tot;
+  var tag=document.getElementById('qtag');
+  tag.textContent=q.sl;
+  tag.className='qtag s'+q.st;
+  document.getElementById('qtext').textContent=q.tx;
+  document.getElementById('qhint').textContent=q.hi?'ヒント：'+q.hi:'';
+  document.getElementById('fb').className='fb';
+  document.getElementById('fb').innerHTML='';
+  document.getElementById('nxtbtn').className='nxtbtn';
+  var sb=document.getElementById('subbtn');
+  sb.disabled=false;sb.style.display='block';
+  var ia=document.getElementById('iarea');
+  var ca=document.getElementById('carea');
+  ia.style.display='none';ca.innerHTML='';
+  if(q.tp==='ch'){
+    sb.style.display='none';
+    var d=document.createElement('div');
+    d.className='choices '+(q.ch.length===2?'c2':'c1');
+    for(var i=0;i<q.ch.length;i++){
+      (function(ch){
+        var b=document.createElement('button');
+        b.className='cbtn';b.textContent=ch;
+        b.addEventListener('click',function(){choose(ch,b);});
+        d.appendChild(b);
+      })(q.ch[i]);
+    }
+    ca.appendChild(d);
+  } else {
+    ia.style.display='block';
+    var inp=document.getElementById('ainput');
+    inp.value='';inp.className='ansinput';inp.disabled=false;
+    inp.onkeydown=function(e){if(e.key==='Enter')submitAns();};
+    sb.disabled=false;
+  }
+}
+
+function choose(ch,btn){
+  if(done) return;
+  done=true;
+  var q=qs[cur];
+  var ok=ch===q.an;
+  var btns=document.querySelectorAll('.cbtn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].disabled=true;
+    if(btns[i].textContent===q.an) btns[i].classList.add('ok');
+    else if(btns[i]===btn&&!ok) btns[i].classList.add('ng');
+  }
+  showFb(ok,q.an,q.ex);
+  if(ok) sc++;
+  ans.push({q:q.tx.split('\n')[0],ok:ok,an:q.an,ex:q.ex});
+}
+
+function submitAns(){
+  if(done) return;
+  var q=qs[cur];
+  var inp=document.getElementById('ainput');
+  var v=inp.value.trim();if(!v) return;
+  done=true;inp.disabled=true;
+  var nm=function(s){return s.replace(/[\s　]+/g,'').toLowerCase().replace(/[？?]/g,'?');};
+  var ok=nm(v)===nm(q.an);
+  inp.className='ansinput '+(ok?'ok':'ng');
+  showFb(ok,q.an,q.ex);
+  if(ok) sc++;
+  ans.push({q:q.tx.split('\n')[0],ok:ok,an:q.an,ex:q.ex});
+  document.getElementById('subbtn').disabled=true;
+}
+
+function showFb(ok,an,ex){
+  var fb=document.getElementById('fb');
+  fb.className='fb show '+(ok?'ok':'ng');
+  fb.innerHTML='<b>'+(ok?'✅ 正解！':'❌ 残念…')+'</b>'+(ok?'':'正解：'+an+'\n')+ex;
+  document.getElementById('nxtbtn').className='nxtbtn show';
+}
+
+function nextQ(){
+  cur++;
+  if(cur>=qs.length) showResult();
+  else renderQ();
+}
+
+function showResult(){
+  document.getElementById('snum').textContent=sc;
+  document.getElementById('sdenom').textContent='/ '+qs.length+'問';
+  var p=sc/qs.length,msg,sub;
+  if(p===1){msg='🎉 完璧！満点達成！';sub='2つの国のルールを完全にマスターしました！';}
+  else if(p>=0.7){msg='👍 よくできました！';sub='惜しい問題を確認して、もう一度挑戦しよう！';}
+  else if(p>=0.4){msg='😊 もう少し！';sub='間違えた問題をよく確認して、再チャレンジしよう！';}
+  else{msg='📖 もう一度復習しよう！';sub='be動詞と一般動詞のルールをおさらいしよう。';}
+  document.getElementById('rmsg').textContent=msg;
+  document.getElementById('rsub').textContent=sub;
+  var wrap=document.getElementById('revwrap');
+  wrap.innerHTML='';
+  var wrong=ans.filter(function(a){return!a.ok;});
+  if(wrong.length===0){
+    var d=document.createElement('div');
+    d.className='allok';d.textContent='全問正解！素晴らしい！🌟';
+    wrap.appendChild(d);
+  } else {
+    var rv=document.createElement('div');
+    rv.className='revlist';
+    rv.innerHTML='<div class="revtitle">間違えた問題の解説</div>';
+    wrong.forEach(function(a){
+      var di=document.createElement('div');
+      di.className='revitem';
+      di.innerHTML='<span class="revq">'+a.q+'</span>正解：<span class="revans">'+a.an+'</span><span class="revexp">'+a.ex.replace(/\n/g,'<br>')+'</span>';
+      rv.appendChild(di);
+    });
+    wrap.appendChild(rv);
+  }
+  show('result');
+}
+
+function retry(){startStage(stgIdx>2?-1:stgIdx);}
+</script>
+</body>
+</html>
